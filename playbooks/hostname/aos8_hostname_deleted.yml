@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  tasks:
+    - name: Run aos_hostname deleted
+      alcatel.aos8.aos8_hostname:
+        state: deleted
+

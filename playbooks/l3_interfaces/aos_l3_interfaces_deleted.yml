@@ -1,0 +1,19 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: L3 Interface deleted with flash_synchro (true)
+  vars:
+    ansible_aos_flash_synchro_flag : true
+  tasks:
+    - name: Run L2 interfaces resource module with state deleted
+      alcatel.aos8.aos8_l3_interfaces:
+        config:
+          - name: intvl33
+            address: 192.168.33.1
+            mask: 255.255.255.0
+            type: vlan
+            port_id: 33
+        state: deleted
+
+

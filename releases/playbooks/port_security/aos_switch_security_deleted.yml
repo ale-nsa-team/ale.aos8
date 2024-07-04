@@ -1,0 +1,17 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: L3 Interface deleted with flash_synchro (true)
+  vars:
+    ansible_aos_write_memory_flash  : false
+    ansible_aos_flash_synchro_flag : false
+  tasks:
+    - name: Run switch security resource module with state deleted
+      alcatel.aos8.aos8_switch_security:
+        config:
+          - access_method: telnet
+            aaa_servers_name: local
+        state: deleted
+
+

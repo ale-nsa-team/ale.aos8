@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  tasks:
+    - name: Run aos_hostname gathered
+      alcatel.aos8.aos8_hostname:
+        state: gathered
+
+

@@ -1,0 +1,19 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: L3 Interface merged with flash_synchro (true)
+  vars:
+    ansible_aos_write_memory_flash  : false
+    ansible_aos_flash_synchro_flag : false
+  tasks:
+    - name: Run L3 interfaces resource module with state merged
+      alcatel.aos8.aos8_radius_servers:
+        config:
+          - name: intvl33
+            host: 192.168.33.1
+            key: ciscotac@123
+            acct_port: 1913
+        state: merged
+
+

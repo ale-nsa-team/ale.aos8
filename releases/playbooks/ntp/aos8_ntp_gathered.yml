@@ -1,0 +1,12 @@
+- name: Backup device configs
+  gather_facts: false
+  connection: network_cli
+  hosts: all
+  tasks:
+    - name: backup AOS configs
+      alcatel.aos8.aos8_ntp:
+        config:
+          servers:
+            - server: "10.1.1.1"
+
+

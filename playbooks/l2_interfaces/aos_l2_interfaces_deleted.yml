@@ -1,0 +1,18 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: L2 Interface deleted with flash_synchro (true)
+  vars:
+    ansible_aos_flash_synchro_flag : false
+  tasks:
+    - name: Run L2 interfaces resource module with state deleted
+      alcatel.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 10
+            mode: tagged
+            port_number: 1/1/27
+            port_type: port
+        state: deleted
+
+

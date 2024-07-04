@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: no
+  ignore_errors: true
+  tasks:
+    - name: Run gather_network_resources with choice l2_interfaces
+      alcatel.aos8.aos8_facts:
+        gather_subset: all
+        gather_network_resources: l2_interfaces

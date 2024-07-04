@@ -1,0 +1,74 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: VLAN overridden with flash_synchro (true)
+  vars:
+    ansible_aos_flash_synchro_flag : false
+  tasks:
+    - name: Run VLAN resource module with state overridden
+      alcatel.aos8.aos8_vlans:
+        config:
+          - vlan_id: 1
+            name: "MGNT"
+            admin: enable
+          - vlan_id: 10
+            name: "Net-A"
+            admin: enable
+          - vlan_id: 11
+            name: "VLAN 11"
+            admin: enable    
+          - vlan_id: 12
+            name: "User 12"
+            admin: enable        
+          - vlan_id: 13
+            name: "User 13"
+            admin: enable      
+          - vlan_id: 14
+            name: "User 14"
+            admin: enable   
+          - vlan_id: 20
+            name: "User 14"
+            admin: enable     
+          - vlan_id: 21
+            name: "L3VPN-NetB"
+            admin: enable     
+          - vlan_id: 30
+            name: "L2SPB"
+            admin: enable       
+          - vlan_id: 40
+            name: "Net-A"
+            admin: disable         
+          - vlan_id: 50
+            name: "L3VPN-NetA"
+            admin: enable       
+          - vlan_id: 51
+            name: "TBL3VPN"
+            admin: enable       
+          - vlan_id: 71
+            name: "Quarantine"
+            admin: enable       
+          - vlan_id: 72
+            name: "production"
+            admin: enable       
+          - vlan_id: 81
+            name: "TB-Prod"
+            admin: enable       
+          - vlan_id: 82
+            name: "TB-Quad"
+            admin: enable       
+          - vlan_id: 91
+            name: "L3VPN-MGNT"
+            admin: enable    
+          - vlan_id: 92
+            name: "L3VPN-MGNT"
+            admin: enable  
+          - vlan_id: 200
+            name: "Ucopia"
+            admin: enable  
+          - vlan_id: 999
+            name: "VLAN 999"
+            admin: enable                                     
+        state: overridden
+
+

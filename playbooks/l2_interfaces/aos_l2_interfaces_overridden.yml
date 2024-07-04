@@ -1,0 +1,322 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: L2 Interface overridden with flash_synchro (true)
+  vars:
+    ansible_aos_flash_synchro_flag : false
+  tasks:
+    - name: Run L2 interfaces resource module with state overridden
+      alcatel.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/1
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/2
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/5
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/6
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/7
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/8
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/27
+            port_type: port            
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/10
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/11
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/12
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/13
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/14
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/15
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/16
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/17
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/18
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/19
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/20
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/21
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/22
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/25
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/26
+            port_type: port
+          - vlan_id: 1
+            mode: untagged
+            port_number: 1/1/28
+            port_type: port
+          - vlan_id: 10
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 10
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 10
+            mode: tagged
+            port_number: 1/1/27
+            port_type: port
+          - vlan_id: 11
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/1
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/5
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/7
+            port_type: port
+          - vlan_id: 12
+            mode: untagged
+            port_number: 1/1/9
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/10
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/12
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/14
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/15
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/16
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/17
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/18
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/20
+            port_type: port
+          - vlan_id: 12
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 13
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 13
+            mode: tagged
+            port_number: 1/1/6
+            port_type: port
+          - vlan_id: 13
+            mode: tagged
+            port_number: 1/1/17
+            port_type: port
+          - vlan_id: 13
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 14
+            mode: tagged
+            port_number: 1/1/2
+            port_type: port
+          - vlan_id: 14
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 14
+            mode: tagged
+            port_number: 1/1/8
+            port_type: port
+          - vlan_id: 14
+            mode: tagged
+            port_number: 1/1/10
+            port_type: port
+          - vlan_id: 14
+            mode: tagged
+            port_number: 1/1/11
+            port_type: port
+          - vlan_id: 14
+            mode: tagged
+            port_number: 1/1/17
+            port_type: port
+          - vlan_id: 14
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 20
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 21
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 21
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 30
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 30
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 40
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 50
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 50
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 51
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 51
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 71
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 71
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 72
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 72
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 81
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 81
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 82
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 82
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 91
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 91
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 92
+            mode: tagged
+            port_number: 1/1/3
+            port_type: port
+          - vlan_id: 92
+            mode: tagged
+            port_number: 1/1/23
+            port_type: port
+          - vlan_id: 200
+            mode: untagged
+            port_number: 1/1/24
+            port_type: port
+        state: overridden
+
+

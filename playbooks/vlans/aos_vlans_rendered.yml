@@ -1,0 +1,18 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: VLAN rendered with flash_synchro (true)
+  vars:
+    ansible_aos_flash_synchro_flag : true
+  tasks:
+    - name: Run VLAN resource module with state rendered
+      alcatel.aos8.aos8_vlans:
+        config:
+          - vlan_id: 998
+            name: "Vlan 998"
+            admin: enable
+            mtu: 1500
+        state: rendered
+
+

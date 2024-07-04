@@ -1,0 +1,14 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: VLAN merged with flash_synchro (true)
+  vars:
+    ansible_aos_flash_synchro_flag : true
+  tasks:
+    - name: Run VLAN resource module with state gathered
+      alcatel.aos8.aos8_vlans:
+        config:
+        state: gathered
+
+

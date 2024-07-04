@@ -1,0 +1,20 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: L3 Interface merged with flash_synchro (true)
+  vars:
+    ansible_aos_write_memory_flash  : false
+    ansible_aos_flash_synchro_flag : false
+  tasks:
+    - name: Run L3 interfaces resource module with state merged
+      alcatel.aos8.aos8_trap_managers:
+        config:
+          - host: 192.168.2.52
+            port: 164
+            version: v3
+            string: snmpwrite
+            state: enable
+        state: replaced
+
+

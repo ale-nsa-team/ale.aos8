@@ -1,0 +1,21 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: VLAN merged with flash_synchro (true)
+  vars:
+    ansible_aos_flash_synchro_flag : true
+  tasks:
+    - name: Run VLAN resource module with state merged
+      alcatel.aos8.aos8_vlans:
+        config:
+          - vlan_id: 33
+            name: "Vlan 33"
+            admin: enable
+            mtu: 1280
+          - vlan_id: 99
+            name: "Vlan 99"
+            admin: enable
+        state: merged
+
+

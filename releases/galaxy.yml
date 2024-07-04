@@ -1,0 +1,14 @@
+---
+authors:
+  - Alcatel-Lucent Enterprise Development Team
+dependencies:
+  "ansible.netcommon": ">=6.0.0"
+license_file: LICENSE
+name: aos8
+namespace: alcatel
+description: Ansible Network Collection for Alcatel AOS8 devices.
+readme: README.md
+repository: https://github.com/ansible-collections/alcatel.aos8
+issues: https://github.com/ansible-collections/alcatel.aos8/issues
+tags: [alcatel, aos, aos8, networking]
+version: "1.0.0"

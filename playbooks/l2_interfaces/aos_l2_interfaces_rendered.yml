@@ -1,0 +1,18 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: L2 Interface rendered 
+  vars:
+    ansible_aos_flash_synchro_flag : false
+  tasks:
+    - name: Run L2 interfaces resource module with state rendered
+      alcatel.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 20
+            port_type: port
+            port_number: 1/1/27
+            mode: tagged  
+        state: rendered
+
+
