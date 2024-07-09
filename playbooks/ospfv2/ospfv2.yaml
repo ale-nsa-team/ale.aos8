@@ -1,0 +1,25 @@
+- name: Configure OSPF on Alcatel devices
+  gather_facts: false
+  connection: network_cli
+  hosts: all
+  tasks:
+    - name: Show current OSPF configuration
+      ansible.netcommon.cli_command:
+        command: show configuration snapshot ospf
+      register: current_config
+
+    - name: Configure OSPF
+      alcatel.aos8.aos8_ospfv2:
+        config:
+          admin_state: enable
+          areas:
+            - area_id: "0.0.0.0"
+              interfaces:
+                - interface: "int_150"
+                  admin_state: enable
+        state: merged
+
+    - name: Show OSPF configuration after change
+      ansible.netcommon.cli_command:
+        command: show configuration snapshot ospf
+      register: new_config

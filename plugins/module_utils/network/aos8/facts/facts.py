@@ -22,7 +22,7 @@ from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.sw
 from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.port_security.port_security import Port_securityFacts
 from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.ntp.ntp import Ntp_Facts
 from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.static_routes.static_routes import Static_routesFacts
-
+from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.ospfv2.ospfv2 import OspfV2_Facts
 
 
 FACT_LEGACY_SUBSETS = {}
@@ -37,6 +37,7 @@ FACT_RESOURCE_SUBSETS = dict(
     vlans=VlansFacts,
     ntp=Ntp_Facts,
     static_routes=Static_routesFacts,
+    ospfv2=OspfV2_Facts,
 )
 
 
