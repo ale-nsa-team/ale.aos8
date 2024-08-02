@@ -1,6 +1,7 @@
 ---
 - hosts: all
   gather_facts: true
+  connection: network_cli
   ignore_errors: true
   name: VLAN merged with flash_synchro (true)
   vars:

@@ -2,6 +2,7 @@
 - hosts: all
   gather_facts: true
   ignore_errors: true
+  connection: network_cli
   name: VLAN replace with flash_synchro (true)
   vars:
     ansible_aos_flash_synchro_flag : true
