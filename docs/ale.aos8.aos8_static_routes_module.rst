@@ -1,8 +1,8 @@
-.. _arista.eos.eos_static_routes_module:
+.. _alcatel.aos8.aos8_static_routes:
 
 
 ****************************
-arista.eos.eos_static_routes
+alcatel.aos8.aos8_static_routes
 ****************************
 
 **Static routes resource module**
