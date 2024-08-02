@@ -1,0 +1,35 @@
+- name: Configure a static route on Alcatel device
+  gather_facts: false
+  connection: network_cli
+  hosts: all
+  tasks:
+    - name: Show current static routes
+      ansible.netcommon.cli_command:
+        command: show configuration snapshot ip-routing
+      register: current_config
+
+    - debug:
+        msg: "Current static routes: {{ current_config.stdout }}"
+
+    - name: Configure a static route
+      alcatel.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: "2.2.2.0/24"
+                next_hops:
+                  - forward_router_address: "10.1.1.1"
+                    description: "My route"
+                    admin_distance: 1
+        state: merged
+      register: result
+
+    - debug:
+        msg: "Commands generated: {{ result.commands }}"
+
+    - name: Show static routes after change
+      ansible.netcommon.cli_command:
+        command: show configuration snapshot ip-routing
+      register: new_config
+
+    - debug:
+        msg: "New static routes: {{ new_config.stdout }}"

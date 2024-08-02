@@ -32,7 +32,7 @@ The arg spec for the aos8_ntp module
 
 
 class Ntp_Args(object):  # pylint: disable=R0903
-    """The arg spec for the eos_ntp_global module"""
+    """The arg spec for the aos_ntp_global module"""
 
     def __init__(self, **kwargs):
         pass

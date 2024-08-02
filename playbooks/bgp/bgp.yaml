@@ -1,0 +1,57 @@
+                                                                                                                                                               
+- name: Configure BGP on Alcatel devices
+  gather_facts: false
+  connection: network_cli
+  hosts: all
+  tasks:
+    - name: Show current BGP configuration
+      ansible.netcommon.cli_command:
+        command: show configuration snapshot bgp
+      register: current_config
+
+    - name: Debug current BGP configuration
+      debug:
+        var: current_config
+
+    - name: Configure BGP
+      alcatel.aos8.aos8_bgp:
+        config:
+          as_number: "100"
+          bgp_admin_state: enable
+          neighbor:
+            - neighbor_address: "192.168.27.7"
+              remote_as: "200"
+              admin_state: enable
+        state: merged
+
+    - name: Show BGP configuration after change
+      ansible.netcommon.cli_command:
+        command: show configuration snapshot bgp
+      register: new_config
+
+    - name: Debug new BGP configuration
+      debug:
+        var: new_config
+
+        ------------------------------------------------------
+- name: Configure BGP on Alcatel devices
+  gather_facts: false
+  connection: network_cli
+  hosts: all
+  tasks:
+    - name: Show current BGP configuration
+      ansible.netcommon.cli_command:
+        command: show configuration snapshot bgp
+      register: current_config
+
+    - name: Configure BGP
+      alcatel.aos8.aos8_bgp:
+        config:
+          as_number: "300"
+          bgp_admin_state: "enable"
+        state: merged
+
+    - name: Show BGP configuration after change
+      ansible.netcommon.cli_command:
+        command: show configuration snapshot bgp
+      register: new_config

@@ -1,6 +1,7 @@
 ---
 - hosts: all
   gather_facts: true
+  connection: network_cli
   ignore_errors: true
   name: L3 Interface merged with flash_synchro (true)
   vars:
@@ -10,11 +11,12 @@
     - name: Run L3 interfaces resource module with state merged
       alcatel.aos8.aos8_l3_interfaces:
         config:
-          - name: intvl33
+          - name: intvl20
             address: 192.168.33.1
             mask: 255.255.255.0
             type: vlan
-            port_id: 33
+            port_id: 20
         state: merged
+
 
 

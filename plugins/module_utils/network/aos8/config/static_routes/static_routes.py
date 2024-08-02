@@ -213,9 +213,8 @@ class Static_routes(ConfigBase):
         commands = []
         if not want:
             for h in have:
-                return_command = add_commands(h)
+                return_command = del_commands(h)
                 for command in return_command:
-                    command = "no " + command
                     commands.append(command)
         else:
             for w in want:
@@ -234,68 +233,56 @@ def set_commands(want, have):
     return commands
 
 
-def add_commands(want):
+def add_commands(want, delete=False):
     commandset = []
     if not want:
         return commandset
 
-    if 'address_families' not in want:
-        print("No address_families found in want")
+    if 'routes' not in want:
+        print("No routes found")
         return commandset
 
-    for af in want["address_families"]:
-        if 'routes' not in af:
-            print("No routes found in address_families")
-            continue
+    for route in want["routes"]:
+        commands = []
+        base_command = "ip static-route " + route["dest"] + " gateway " + route["next_hops"][0]["forward_router_address"]
+        if delete:
+            commands.append("no ip static-route " + route["dest"] + " gateway " + route["next_hops"][0]["forward_router_address"])
+        else:
+            if "admin_distance" in route["next_hops"][0]:
+                base_command += " metric " + str(route["next_hops"][0]["admin_distance"])
+            if "description" in route["next_hops"][0]:
+                base_command += " name \"" + route["next_hops"][0]["description"] + "\""
+            if "tag" in route["next_hops"][0]:
+                base_command += " tag " + str(route["next_hops"][0]["tag"])
+            commands.append(base_command)
 
-        for route in af["routes"]:
-            commands = []
-            commands.append("ip static-route " + route["dest"])
-            next_hop = route["next_hops"][0]
-            commands.append(" gateway " + next_hop["forward_router_address"])
-            if "admin_distance" in next_hop:
-                commands.append(" metric " + str(next_hop["admin_distance"]))
-            if "description" in next_hop:
-                commands.append(" name \"" + next_hop["description"] + "\"")
-            if "tag" in next_hop:
-                commands.append(" tag " + str(next_hop["tag"]))
+        for command in commands:
+            commandset.append(command)
+            print("Generated command: ", command)
 
-            config_commands = "".join(commands)
-            commandset.append(config_commands)
-
-            # Ajoutez cette ligne pour déboguer les commandes générées
-            print("Generated command: ", config_commands)
-    
     return commandset
 
 
-
-def del_commands(want, have):
+def del_commands(want, have=None):
     commandset = []
-    haveconfigs = []
-    for h in have:
-        return_command = add_commands(h)
-        for command in return_command:
-            command = "no " + command
-            haveconfigs.append(command)
-    if want is None:
-        commandset = haveconfigs
-    else:
-        for w in want:
-            for h in have:
-                if w["ip_address"] == h["ip_address"]:
-                    return_command = add_commands(w)
-                    for command in return_command:
-                        command = "no " + command
-                        commandset.append(command)
+    if 'routes' not in want:
+        print("No routes found")
+        return commandset
+
+    for route in want["routes"]:
+        command = "no ip static-route " + route["dest"]
+        if "forward_router_address" in route["next_hops"][0]:
+            command += " gateway " + route["next_hops"][0]["forward_router_address"]
+        if "admin_distance" in route["next_hops"][0]:
+            command += " metric " + str(route["next_hops"][0]["admin_distance"])
+        commandset.append(command)
+        print("Generated delete command: ", command)
+
     return commandset
 
 
 def get_dest(config):
     dest = []
-    for c in config:
-        if 'routes' in c:
-            for route in c["routes"]:
-                dest.append(route["ip_address"])
+    for route in config.get("routes", []):
+        dest.append(route["dest"])
     return dest
-

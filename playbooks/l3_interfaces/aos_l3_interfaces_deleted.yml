@@ -1,6 +1,7 @@
 ---
 - hosts: all
   gather_facts: true
+  connection: network_cli
   ignore_errors: true
   name: L3 Interface deleted with flash_synchro (true)
   vars:

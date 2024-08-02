@@ -23,7 +23,7 @@
 #############################################
 
 """
-The module file for eos_static_routes
+The module file for aos8_static_routes
 """
 
 from __future__ import absolute_import, division, print_function

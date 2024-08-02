@@ -23,7 +23,7 @@ from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.po
 from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.ntp.ntp import Ntp_Facts
 from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.static_routes.static_routes import Static_routesFacts
 from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.ospfv2.ospfv2 import OspfV2_Facts
-
+from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.bgp.bgp import Bgp_Facts
 
 FACT_LEGACY_SUBSETS = {}
 FACT_RESOURCE_SUBSETS = dict(
@@ -38,6 +38,7 @@ FACT_RESOURCE_SUBSETS = dict(
     ntp=Ntp_Facts,
     static_routes=Static_routesFacts,
     ospfv2=OspfV2_Facts,
+    bgp=Bgp_Facts,
 )
 
 
