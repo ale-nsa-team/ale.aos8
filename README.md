@@ -15,7 +15,7 @@ This collection has been tested against ALE AOS 8.9.221.R03 GA.
 This collection has been tested against following Ansible versions: **>=2.14.0**.
 
 For collections that support Ansible 2.9, please ensure you update your `network_os` to use the
-fully qualified collection name (for example, `Alcatel.aos8.aos8`).
+fully qualified collection name (for example, `Alcatel.aos8`).
 Plugins and modules within a collection may be tested with only specific Ansible versions.
 A collection may contain metadata that identifies these versions.
 PEP440 is the schema used to describe the versions of Ansible.
@@ -31,20 +31,20 @@ The ALE AOS 8 collection supports `network_cli` connections.
 ### Cliconf plugins
 Name | Description
 --- | ---
-[Alcatel.aos8.aos8](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_cliconf.rst)|Use aos8 cliconf to run command on ALE AOS 8 platform
+[Alcatel.aos8](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8_cliconf.rst)|Use aos8 cliconf to run command on ALE AOS 8 platform
 
 ### Modules
 Name | Description
 --- | ---
-[Alcatel.aos8.aos8_command](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_command_module.rst)|Module to run commands on remote devices.
-[Alcatel.aos8.aos8_facts](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_facts_module.rst)|Module to collect facts from remote devices.
-[Alcatel.aos8.aos8_hostname](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_hostname_module.rst)|Resource module to configure hostname.
-[Alcatel.aos8.aos8_switch_security](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_switch_security.rst)|Resource module to configure switch security.
-[Alcatel.aos8.aos8_vlans](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_vlans_module.rst)|Resource module to configure VLANs.
-[Alcatel.aos8.aos8_l2_interfaces](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_l2_interfaces_module.rst)|Resource module to configure L2 interfaces.
-[Alcatel.aos8.aos8_l3_interfaces](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_l3_interfaces_module.rst)|Resource module to configure L3 interfaces.
-[Alcatel.aos8.aos8_radius_servers](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_radius_servers_module.rst)|Resource module to configure Radius Servers.
-[Alcatel.aos8.aos8_trap_managers](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_trap_managers_module.rst)|Resource module to configure Trap Managers.
+[Alcatel.aos8_command](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8_command_module.rst)|Module to run commands on remote devices.
+[Alcatel.aos8_facts](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8_facts_module.rst)|Module to collect facts from remote devices.
+[Alcatel.aos8_hostname](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8_hostname_module.rst)|Resource module to configure hostname.
+[Alcatel.aos8_switch_security](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8_switch_security.rst)|Resource module to configure switch security.
+[Alcatel.aos8_vlans](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8_vlans_module.rst)|Resource module to configure VLANs.
+[Alcatel.aos8_l2_interfaces](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8_l2_interfaces_module.rst)|Resource module to configure L2 interfaces.
+[Alcatel.aos8_l3_interfaces](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8_l3_interfaces_module.rst)|Resource module to configure L3 interfaces.
+[Alcatel.aos8_radius_servers](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8_radius_servers_module.rst)|Resource module to configure Radius Servers.
+[Alcatel.aos8_trap_managers](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8_trap_managers_module.rst)|Resource module to configure Trap Managers.
 
 
 <!--end collection content-->
@@ -70,13 +70,13 @@ This collection includes [network resource modules](https://docs.ansible.com/ans
 
 ### Using modules from the ALE AOS 8 collection in your playbooks
 
-You can call modules by their Fully Qualified Collection Namespace (FQCN), such as `Alcatel.aos8.aos8_l2_interfaces`.
+You can call modules by their Fully Qualified Collection Namespace (FQCN), such as `Alcatel.aos8_l2_interfaces`.
 The following example task replaces configuration changes in the existing configuration on a ALE AOS 8 network device, using the FQCN:
 
 ```yaml
 ---
 - name: Add device configuration of specified L2 interfaces with provided configuration.
-  Alcatel.aos8.aos8_l2_interfaces:
+  Alcatel.aos8_l2_interfaces:
     config:
       - vlan_id: 20
         port_type: port
@@ -132,4 +132,5 @@ Release notes are available [here](https://github.com/Samuelyip74/Alcatel.aos8/b
 GNU General Public License v3.0 or later.
 
 See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
+
 
