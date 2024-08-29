@@ -12,7 +12,7 @@
         msg: "Current static routes: {{ current_config.stdout }}"
 
     - name: Configure a static route
-      ale.aos8.aos8_static_routes:
+      alcatel.aos8.aos8_static_routes:
         config:
           - address_families:
               - afi: ipv4
