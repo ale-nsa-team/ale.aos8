@@ -1,10 +1,10 @@
 # ALE AOS8 Collection
 
-[![CI](https://zuul-ci.org/gated.svg)](https://dashboard.zuul.ansible.com/t/ansible/project/github.com/ansible-collections/ALE.aos8)
-[![Codecov](https://codecov.io/gh/ansible-collections/ALE.aos8/branch/main/graph/badge.svg)](https://codecov.io/gh/ansible-collections/ALE.aos8)
-[![CI](https://github.com/ansible-collections/ALE.aos8/actions/workflows/tests.yml/badge.svg?branch=main&event=schedule)](https://github.com/ansible-collections/ALE.aos8/actions/workflows/tests.yml)
+[![CI](https://zuul-ci.org/gated.svg)](https://dashboard.zuul.ansible.com/t/ansible/project/github.com/ansible-collections/Alcatel.aos8)
+[![Codecov](https://codecov.io/gh/ansible-collections/Alcatel.aos8/branch/main/graph/badge.svg)](https://codecov.io/gh/ansible-collections/Alcatel.aos8)
+[![CI](https://github.com/ansible-collections/Alcatel.aos8/actions/workflows/tests.yml/badge.svg?branch=main&event=schedule)](https://github.com/ansible-collections/Alcatel.aos8/actions/workflows/tests.yml)
 
-The Ansible ALE AOS 8 collection includes a variety of Ansible content to help automate the management of ALE AOS 8 netowork appliances.
+The Ansible ALE AOS 8 collection includes a variety of Ansible content to help automate the management of ALE AOS 8 network appliances.
 
 This collection has been tested against ALE AOS 8.9.221.R03 GA.
 
@@ -15,7 +15,7 @@ This collection has been tested against ALE AOS 8.9.221.R03 GA.
 This collection has been tested against following Ansible versions: **>=2.14.0**.
 
 For collections that support Ansible 2.9, please ensure you update your `network_os` to use the
-fully qualified collection name (for example, `ALE.aos8.aos8`).
+fully qualified collection name (for example, `Alcatel.aos8.aos8`).
 Plugins and modules within a collection may be tested with only specific Ansible versions.
 A collection may contain metadata that identifies these versions.
 PEP440 is the schema used to describe the versions of Ansible.
@@ -31,20 +31,20 @@ The ALE AOS 8 collection supports `network_cli` connections.
 ### Cliconf plugins
 Name | Description
 --- | ---
-[ALE.aos8.aos8](https://github.com/ansible-collections/ALE.aos8/blob/main/docs/ALE.aos8.aos8_cliconf.rst)|Use aos8 cliconf to run command on ALE AOS 8 platform
+[Alcatel.aos8.aos8](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_cliconf.rst)|Use aos8 cliconf to run command on ALE AOS 8 platform
 
 ### Modules
 Name | Description
 --- | ---
-[ALE.aos8.aos8_command](https://github.com/ansible-collections/ALE.aos8/blob/main/docs/ALE.aos8.aos8_command_module.rst)|Module to run commands on remote devices.
-[ALE.aos8.aos8_facts](https://github.com/ansible-collections/ALE.aos8/blob/main/docs/ALE.aos8.aos8_facts_module.rst)|Module to collect facts from remote devices.
-[ALE.aos8.aos8_hostname](https://github.com/ansible-collections/ALE.aos8/blob/main/docs/ALE.aos8.aos8_hostname_module.rst)|Resource module to configure hostname.
-[ALE.aos8.aos8_switch_security](https://github.com/ansible-collections/ALE.aos8/blob/main/docs/ALE.aos8.aos8_switch_security.rst)|Resource module to configure switch security.
-[ALE.aos8.aos8_vlans](https://github.com/ansible-collections/ALE.aos8/blob/main/docs/ALE.aos8.aos8_vlans_module.rst)|Resource module to configure VLANs.
-[ALE.aos8.aos8_l2_interfaces](https://github.com/ansible-collections/ALE.aos8/blob/main/docs/ALE.aos8.aos8_l2_interfaces_module.rst)|Resource module to configure L2 interfaces.
-[ALE.aos8.aos8_l3_interfaces](https://github.com/ansible-collections/ALE.aos8/blob/main/docs/ALE.aos8.aos8_l3_interfaces_module.rst)|Resource module to configure L3 interfaces.
-[ALE.aos8.aos8_radius_servers](https://github.com/ansible-collections/ALE.aos8/blob/main/docs/ALE.aos8.aos8_radius_servers_module.rst)|Resource module to configure Radius Servers.
-[ALE.aos8.aos8_trap_managers](https://github.com/ansible-collections/ALE.aos8/blob/main/docs/ALE.aos8.aos8_trap_managers_module.rst)|Resource module to configure Trap Managers.
+[Alcatel.aos8.aos8_command](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_command_module.rst)|Module to run commands on remote devices.
+[Alcatel.aos8.aos8_facts](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_facts_module.rst)|Module to collect facts from remote devices.
+[Alcatel.aos8.aos8_hostname](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_hostname_module.rst)|Resource module to configure hostname.
+[Alcatel.aos8.aos8_switch_security](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_switch_security.rst)|Resource module to configure switch security.
+[Alcatel.aos8.aos8_vlans](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_vlans_module.rst)|Resource module to configure VLANs.
+[Alcatel.aos8.aos8_l2_interfaces](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_l2_interfaces_module.rst)|Resource module to configure L2 interfaces.
+[Alcatel.aos8.aos8_l3_interfaces](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_l3_interfaces_module.rst)|Resource module to configure L3 interfaces.
+[Alcatel.aos8.aos8_radius_servers](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_radius_servers_module.rst)|Resource module to configure Radius Servers.
+[Alcatel.aos8.aos8_trap_managers](https://github.com/ansible-collections/Alcatel.aos8/blob/main/docs/Alcatel.aos8.aos8_trap_managers_module.rst)|Resource module to configure Trap Managers.
 
 
 <!--end collection content-->
@@ -53,7 +53,7 @@ Name | Description
 
 You can install the ALE AOS 8 collection with the Ansible Galaxy CLI:
 
-    ansible-galaxy collection install ALE.aos8  
+    ansible-galaxy collection install Alcatel.aos8  
     ansible-galaxy collection install ALE-aos8-<version>.tar.gz --force
 
 You can also include it in a `requirements.yml` file and install it with `ansible-galaxy collection install -r requirements.yml`, using the format:
@@ -61,7 +61,7 @@ You can also include it in a `requirements.yml` file and install it with `ansibl
 ```yaml
 ---
 collections:
-  - name: ALE.aos8
+  - name: Alcatel.aos8
 ```
 
 ## Using this collection
@@ -70,13 +70,13 @@ This collection includes [network resource modules](https://docs.ansible.com/ans
 
 ### Using modules from the ALE AOS 8 collection in your playbooks
 
-You can call modules by their Fully Qualified Collection Namespace (FQCN), such as `ALE.aos8.aos8_l2_interfaces`.
+You can call modules by their Fully Qualified Collection Namespace (FQCN), such as `Alcatel.aos8.aos8_l2_interfaces`.
 The following example task replaces configuration changes in the existing configuration on a ALE AOS 8 network device, using the FQCN:
 
 ```yaml
 ---
 - name: Add device configuration of specified L2 interfaces with provided configuration.
-  ALE.aos8.aos8_l2_interfaces:
+  Alcatel.aos8.aos8_l2_interfaces:
     config:
       - vlan_id: 20
         port_type: port
@@ -94,7 +94,7 @@ The following example task replaces configuration changes in the existing config
 
 ## Contributing to this collection
 
-We welcome community contributions to this collection. If you find problems, please open an issue or create a PR against the [ALE AOS 8 collection repository](https://github.com/Samuelyip74/ALE.aos8/issues). See [Contributing to Ansible-maintained collections](https://docs.ansible.com/ansible/devel/community/contributing_maintained_collections.html#contributing-maintained-collections) for complete details.
+We welcome community contributions to this collection. If you find problems, please open an issue or create a PR against the [ALE AOS 8 collection repository](https://github.com/Samuelyip74/Alcatel.aos8/issues). See [Contributing to Ansible-maintained collections](https://docs.ansible.com/ansible/devel/community/contributing_maintained_collections.html#contributing-maintained-collections) for complete details.
 
 You can also join us on:
 
@@ -113,7 +113,7 @@ Please read and familiarize yourself with this document.
 
 <!--Add a link to a changelog.md file or an external docsite to cover this information. -->
 
-Release notes are available [here](https://github.com/Samuelyip74/ALE.aos8/blob/main/aos8/changelog.rst).
+Release notes are available [here](https://github.com/Samuelyip74/Alcatel.aos8/blob/main/aos8/changelog.rst).
 
 ## Roadmap
 
@@ -132,3 +132,4 @@ Release notes are available [here](https://github.com/Samuelyip74/ALE.aos8/blob/
 GNU General Public License v3.0 or later.
 
 See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
+
