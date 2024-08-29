@@ -1,4 +1,4 @@
-- name: Configure a static route on Alcatel device
+- name: Configure a static route on ALE device
   gather_facts: false
   connection: network_cli
   hosts: all
