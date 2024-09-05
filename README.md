@@ -1,4 +1,4 @@
-# ALE AOS8 Collection
+# ALE AOS 8 Collection
 
 [![CI](https://zuul-ci.org/gated.svg)](https://dashboard.zuul.ansible.com/t/ansible/project/github.com/ansible-collections/ale.aos8)
 [![Codecov](https://codecov.io/gh/ansible-collections/ale.aos8/branch/main/graph/badge.svg)](https://codecov.io/gh/ansible-collections/ale.aos8)
