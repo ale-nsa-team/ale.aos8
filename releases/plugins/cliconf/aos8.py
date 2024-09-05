@@ -25,7 +25,7 @@ DOCUMENTATION = """
 author:
 - Samuel Yip (@samuelyip74)
 name: AOS8
-short_description: Use AOS8 cliconf to run command on Alcatel-Lucent Enterprise AOS8 platform
+short_description: Use AOS8 cliconf to run command on Alcatel-Lucent Enterprise AOS 8 platform
 description:
 - This AOS8 plugin provides low level abstraction apis for sending and receiving CLI
   commands from Alcatel-Lucent Enterprise AOS8 network devices.
@@ -60,7 +60,7 @@ EXAMPLES = """
     ansible_aos_flash_synchro_flag: false
   tasks:
     - name: "Commit confirmed with timeout"
-      alcatel.aos8.aos8_hostname:
+      ale.aos8.aos8_hostname:
         state: merged
         config:
           hostname: R1

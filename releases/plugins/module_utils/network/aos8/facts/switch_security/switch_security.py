@@ -20,7 +20,7 @@ from copy import deepcopy
 
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.switch_security.switch_security import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.switch_security.switch_security import (
     Switch_securityArgs,
 )
 

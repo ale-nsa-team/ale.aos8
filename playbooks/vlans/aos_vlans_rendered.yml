@@ -8,7 +8,7 @@
     ansible_aos_flash_synchro_flag : true
   tasks:
     - name: Run VLAN resource module with state rendered
-      alcatel.aos8.aos8_vlans:
+      ale.aos8.aos8_vlans:
         config:
           - vlan_id: 998
             name: "Vlan 998"

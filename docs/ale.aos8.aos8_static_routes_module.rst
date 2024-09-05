@@ -1,8 +1,8 @@
-.. _alcatel.aos8.aos8_static_routes:
+.. _ale.aos8.aos8_static_routes:
 
 
 ****************************
-alcatel.aos8.aos8_static_routes
+ale.aos8.aos8_static_routes
 ****************************
 
 **Static routes resource module**
@@ -211,7 +211,7 @@ Examples
 
     # Using deleted----------------------------------------------------------------------------------------
 
-    - name: Configure a static route on Alcatel device
+    - name: Configure a static route on Alcatel-Lucent Enterprise device
       gather_facts: false
       connection: network_cli
       hosts: all
@@ -225,7 +225,7 @@ Examples
                 msg: "Current static routes: {{ current_config.stdout }}"
 
           - name: Configure a static route
-            alcatel.aos8.aos8_static_routes:
+            ale.aos8.aos8_static_routes:
                 config:
                 - routes:
                     - dest: "2.2.2.0/24"
@@ -250,7 +250,7 @@ Examples
 
     # Using merged--------------------------------------------------------------------------------------------
 
-    - name: Configure a static route on Alcatel device
+    - name: Configure a static route on Alcatel-Lucent Enterprise device
       gather_facts: false
       connection: network_cli
       hosts: all
@@ -264,7 +264,7 @@ Examples
                 msg: "Current static routes: {{ current_config.stdout }}"
 
           - name: Configure a static route
-            alcatel.aos8.aos8_static_routes:
+            ale.aos8.aos8_static_routes:
                 config:
                 - routes:
                     - dest: "2.2.2.0/24"

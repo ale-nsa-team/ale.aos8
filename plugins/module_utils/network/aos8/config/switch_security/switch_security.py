@@ -26,8 +26,8 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
     to_list,
 )
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.facts import Facts
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.utils.utils import dict_to_set
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.facts import Facts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.utils.utils import dict_to_set
 
 
 class Switch_security(ConfigBase):

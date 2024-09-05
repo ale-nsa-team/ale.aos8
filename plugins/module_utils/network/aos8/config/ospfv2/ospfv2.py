@@ -4,7 +4,7 @@
 # GNU General Public License v3.0+
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """
-The alcatel_ospf class
+The ale_ospf class
 It is in this file where the current configuration (as dict)
 is compared to the provided configuration (as dict) and the command set
 necessary to bring the current configuration to its desired end-state is
@@ -20,11 +20,11 @@ from copy import deepcopy
 
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base import ConfigBase
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import dict_diff, remove_empties, to_list
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.facts import Facts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.facts import Facts
 
 class Ospfv2(ConfigBase):
     """
-    The alcatel_aos8_ospv2 class
+    The ale_aos8_ospv2 class
     """
 
     gather_subset = ["!all", "!min"]

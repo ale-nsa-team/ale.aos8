@@ -25,14 +25,14 @@ __metaclass__ = type
 
 DOCUMENTATION = """
 module: aos8_vlans
-short_description: Resource module to configure VLANs on AOS8 devices
+short_description: Resource module to configure VLANs on AOS 8 devices
 description:
-  This module provides declarative management of VLANs on Alcatel AOS8 network
+  This module provides declarative management of VLANs on Alcatel-Lucent Enterprise AOS 8 network
   devices.
 version_added: 1.0.0
 author: Samuel Yip Kah Yean (@samuelyip74)
 notes:
-  - Tested against Alcatel-Lucent AOS8 OmniSwitch with Version 8.9.221.R03 GA.
+  - Tested against Alcatel-Lucent Enterprise AOS 8 OmniSwitch with Version 8.9.221.R03 GA.
   - This module works with connection C(network_cli).
 options:
   config:
@@ -119,7 +119,7 @@ EXAMPLES = """
   ignore_errors: true
   tasks:
     - name: Run merged VLAN with existing VLANs
-      alcatel.aos8.aos8_vlans:
+      ale.aos8.aos8_vlans:
         config:
           - vlan_id: 33
             name: "Vlan 33"
@@ -223,7 +223,7 @@ EXAMPLES = """
 # 99     std       Ena     Dis   Dis    1500    Vlan_99
 
 # - name: Override device configuration of all VLANs with provided configuration
-#   alcatel.aos8.aos8_vlans:
+#   ale.aos8.aos8_vlans:
 #     config:
 #       - vlan_id: 1
 #         name: MGNT
@@ -305,7 +305,7 @@ EXAMPLES = """
 # 33     std       Ena     Dis   Ena    1280    Vlan_33
 
 - name: Replaces device configuration of listed VLANs with provided configuration
-  alcatel.aos8.aos8_vlans:
+  ale.aos8.aos8_vlans:
     config:
       - vlan_id: 33
         name: "Vlan 33"
@@ -418,7 +418,7 @@ EXAMPLES = """
 # 99     std       Ena     Dis   Ena    1500    Vlan_99
 
   - name: Run VLAN resource module with state deleted
-    alcatel.aos8.aos8_vlans:
+    ale.aos8.aos8_vlans:
       config:
         - vlan_id: 33
         - vlan_id: 99
@@ -508,7 +508,7 @@ EXAMPLES = """
 # 99     std       Ena     Dis   Ena    1500    Vlan_99
 
 - name: Gather listed vlans with provided configurations
-  alcatel.aos8.aos8_vlans:
+  ale.aos8.aos8_vlans:
     config:
     configuration: true
     state: gathered
@@ -572,10 +572,10 @@ commands:
 """
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.vlans.vlans import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.vlans.vlans import (
     VlansArgs,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.config.vlans.vlans import Vlans
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.vlans.vlans import Vlans
 
 
 def main():

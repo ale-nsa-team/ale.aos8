@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 """
-The Alcatel OSPFv2 fact class
+The Alcatel-Lucent Enterprise OSPFv2 fact class
 It is in this file the configuration is collected from the device
 for a given resource, parsed, and the facts tree is populated
 based on the configuration.
@@ -20,12 +20,12 @@ from copy import deepcopy
 
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.ospfv2.ospfv2 import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.ospfv2.ospfv2 import (
     OspfV2_Args,
 )
 
 class OspfV2_Facts(object):
-    """The Alcatel OSPF fact class"""
+    """The Alcatel-Lucent Enterprise OSPF fact class"""
 
     def __init__(self, module, subspec="config", options="options"):
         self._module = module

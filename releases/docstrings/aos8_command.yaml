@@ -17,7 +17,7 @@ description:
   - This module does not automatically save the configuration into memory and flash. 
 version_added: 1.0.0
 notes:
-  - Tested against Alcatel AOS8 8.9.221.R03 GA.
+  - Tested against Alcatel-Lucent AOS 8 8.9.221.R03 GA.
   - This module works with connection C(network_cli).
     See U(https://docs.ansible.com/ansible/latest/network/user_guide/platform_aos8.html)
 options:
@@ -70,22 +70,22 @@ options:
 
 EXAMPLES:
 - name: Run show version on remote devices
-  alcatel.aos8.aos8_command:
+  ale.aos8.aos8_command:
     commands: show system
 
 - name: Run show version and check to see if output contains aos8
-  alcatel.aos8.aos8_command:
+  ale.aos8.aos8_command:
     commands: show system
     wait_for: result[0] contains aos8
 
 - name: Run multiple commands on remote nodes
-  alcatel.aos8.aos8_command:
+  ale.aos8.aos8_command:
     commands:
       - show system
       - show interfaces
 
 - name: Run multiple commands and evaluate the output
-  alcatel.aos8.aos8_command:
+  ale.aos8.aos8_command:
     commands:
       - show system
       - show interfaces

@@ -8,7 +8,7 @@
     ansible_aos_flash_synchro_flag : false
   tasks:
     - name: Run switch security resource module with state replaced
-      alcatel.aos8.aos8_switch_security:
+      ale.aos8.aos8_switch_security:
         config:
           - access_method: telnet
             aaa_servers_name: local

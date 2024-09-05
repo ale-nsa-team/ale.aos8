@@ -27,12 +27,12 @@ DOCUMENTATION = """
 module: aos8_l3_interfaces
 short_description: Resource module to configure Layer 3 interface on AOS8 devices
 description:
-  This module provides declarative management of l3 interfaces on Alcatel AOS8 network
+  This module provides declarative management of l3 interfaces on Alcatel-Lucent Enterprise AOS 8 network
   devices.
 version_added: 1.0.0
 author: Samuel Yip Kah Yean (@samuelyip74)
 notes:
-  - Tested against Alcatel-Lucent AOS8 OmniSwitch with Version 8.9.221.R03 GA.
+  - Tested against Alcatel-Lucent Enterprise AOS 8 OmniSwitch with Version 8.9.221.R03 GA.
   - This module works with connection C(network_cli).
 options:
   config:
@@ -140,7 +140,7 @@ EXAMPLES = """
     ansible_aos_flash_synchro_flag : false
   tasks:
     - name: Run L3 interfaces resource module with state merged
-      alcatel.aos8.aos8_l3_interfaces:
+      ale.aos8.aos8_l3_interfaces:
         config:
           - name: intvlan33
             address: 192.168.33.1
@@ -227,7 +227,7 @@ EXAMPLES = """
     ansible_aos_flash_synchro_flag : true
   tasks:
     - name: Run L3 interfaces resource module with state overridden
-      alcatel.aos8.aos8_l3_interfaces:
+      ale.aos8.aos8_l3_interfaces:
         config:
           - name: intvlan1
             address: 192.168.1.1
@@ -311,7 +311,7 @@ EXAMPLES = """
     ansible_aos_flash_synchro_flag : false
   tasks:
     - name: Run L3 interfaces resource module with state deleted
-      alcatel.aos8.aos8_l3_interfaces:
+      ale.aos8.aos8_l3_interfaces:
         config:
           - name: intvlan33
             address: 192.168.33.1
@@ -387,7 +387,7 @@ EXAMPLES = """
     ansible_aos_flash_synchro_flag : false
   tasks:
     - name: Run L3 interfaces resource module with state rendered
-      alcatel.aos8.aos8_l3_interfaces:
+      ale.aos8.aos8_l3_interfaces:
         config:
           - name: intvlan33
             address: 192.168.33.1
@@ -445,10 +445,10 @@ commands:
 """
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.l3_interfaces.l3_interfaces import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.l3_interfaces.l3_interfaces import (
     L3_interfacesArgs,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.config.l3_interfaces.l3_interfaces import L3_interfaces
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.l3_interfaces.l3_interfaces import L3_interfaces
 
 
 def main():

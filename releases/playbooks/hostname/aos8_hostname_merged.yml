@@ -4,7 +4,7 @@
   ignore_errors: true
   tasks:
     - name: Run aos_hostname merged
-      alcatel.aos8.aos8_hostname:
+      ale.aos8.aos8_hostname:
         config:
           hostname: R1
         state: merged

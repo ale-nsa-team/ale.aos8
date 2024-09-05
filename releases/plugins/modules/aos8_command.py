@@ -32,7 +32,7 @@ description:
   - This module does not automatically save the configuration into memory and flash. 
 version_added: 1.0.0
 notes:
-  - Tested against Alcatel AOS8 8.9.221.R03 GA.
+  - Tested against Alcatel-Lucent Enterprise AOS 8 8.9.221.R03 GA.
   - This module works with connection C(network_cli).
     See U(https://docs.ansible.com/ansible/latest/network/user_guide/platform_aos8.html)
 options:
@@ -58,11 +58,11 @@ options:
 
 EXAMPLES:
 - name: Run show system on remote devices
-  alcatel.aos8.aos8_command:
+  ale.aos8.aos8_command:
     commands: show system
 
 - name: Run multiple commands on remote nodes
-  alcatel.aos8.aos8_command:
+  ale.aos8.aos8_command:
     commands:
       - show system
       - show interfaces
@@ -72,7 +72,7 @@ EXAMPLES:
 EXAMPLES = r"""
 
 - name: Run show system command on remote nodes
-  alcatel.aos8.aos8_command:
+  ale.aos8.aos8_command:
     commands:
       - show system 
 
@@ -126,7 +126,7 @@ EXAMPLES = r"""
 
 
 - name: Run multiple commands on remote nodes
-  alcatel.aos8.aos8_command:
+  ale.aos8.aos8_command:
     commands:
       - show system 
       - show ip interface
@@ -221,11 +221,11 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
     to_lines,
     transform_commands,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.command.command import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.command.command import (
     CommandArgs,
 )
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.aos8 import run_commands
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.aos8 import run_commands
 
 def parse_commands(module, warnings):
     commands = transform_commands(module)

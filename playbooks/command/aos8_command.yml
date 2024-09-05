@@ -4,7 +4,7 @@
   ignore_errors: true
   tasks:
   - name: Run multiple commands on remote nodes
-    alcatel.aos8.aos8_command:
+    ale.aos8.aos8_command:
       commands:
         - show system 
         - show ip interface

@@ -16,7 +16,7 @@ __metaclass__ = type
 import re
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base import ConfigBase
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import remove_empties
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.facts import Facts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.facts import Facts
 
 
 class Static_routes(ConfigBase):

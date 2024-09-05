@@ -7,7 +7,7 @@
     ansible_aos_flash_synchro_flag : true
   tasks:
     - name: Run VLAN resource playbook with state replaced
-      alcatel.aos8.aos8_vlans:
+      ale.aos8.aos8_vlans:
         config:
           - vlan_id: 33
             name: "Vlan 33"

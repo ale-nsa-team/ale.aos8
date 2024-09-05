@@ -3,6 +3,6 @@
   gather_facts: true
   tasks:
   - name: Run gather_network_resources
-    alcatel.aos8.aos8_facts:
+    ale.aos8.aos8_facts:
       gather_subset: all
       gather_network_resources: radius_servers

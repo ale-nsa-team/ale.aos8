@@ -26,9 +26,9 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
     dict_merge,
 )
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.facts import Facts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.facts import Facts
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.rm_templates.Ntp_Template import Ntp_Template
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.rm_templates.Ntp_Template import Ntp_Template
 
 
 

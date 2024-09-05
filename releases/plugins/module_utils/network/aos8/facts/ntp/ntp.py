@@ -17,10 +17,10 @@ based on the configuration.
 
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.ntp.ntp import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.ntp.ntp import (
     Ntp_Args,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.rm_templates.Ntp_Template import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.rm_templates.Ntp_Template import (
     Ntp_Template,
 )
 

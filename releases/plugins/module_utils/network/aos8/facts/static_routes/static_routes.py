@@ -17,7 +17,7 @@ __metaclass__ = type
 import re
 from copy import deepcopy
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.static_routes.static_routes import Static_routesArgs
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.static_routes.static_routes import Static_routesArgs
 
 class Static_routesFacts(object):
     """The aos8 static_routes fact class"""
@@ -40,7 +40,7 @@ class Static_routesFacts(object):
         return connection.get("show configuration snapshot ip-routing")
 
     def populate_facts(self, connection, ansible_facts, data=None):
-        """Populate the facts for static_routes for Alcatel devices
+        """Populate the facts for static_routes for Alcatel-Lucent Enterprise devices
         :param connection: the device connection
         :param ansible_facts: Facts dictionary
         :param data: previously collected conf

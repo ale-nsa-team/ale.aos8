@@ -12,16 +12,16 @@ calls the appropriate facts gathering function
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts import (
     FactsBase,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.hostname.hostname import HostnameFacts
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.vlans.vlans import VlansFacts
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.l2_interfaces.l2_interfaces import L2_interfacesFacts
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.l3_interfaces.l3_interfaces import L3_interfacesFacts
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.radius_servers.radius_servers import Radius_serversFacts
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.trap_managers.trap_managers import Trap_managersFacts
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.switch_security.switch_security import Switch_securityFacts
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.port_security.port_security import Port_securityFacts
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.ntp.ntp import Ntp_Facts
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.static_routes.static_routes import Static_routesFacts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.hostname.hostname import HostnameFacts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.vlans.vlans import VlansFacts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.l2_interfaces.l2_interfaces import L2_interfacesFacts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.l3_interfaces.l3_interfaces import L3_interfacesFacts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.radius_servers.radius_servers import Radius_serversFacts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.trap_managers.trap_managers import Trap_managersFacts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.switch_security.switch_security import Switch_securityFacts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.port_security.port_security import Port_securityFacts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.ntp.ntp import Ntp_Facts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.static_routes.static_routes import Static_routesFacts
 
 
 

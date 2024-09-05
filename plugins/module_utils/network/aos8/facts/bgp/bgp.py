@@ -17,8 +17,8 @@ based on the configuration.
 from ansible.module_utils.six import iteritems
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.bgp.bgp import Bgp_Args
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.rm_templates.Bgp_Template import Bgp_Template
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.bgp.bgp import Bgp_Args
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.rm_templates.Bgp_Template import Bgp_Template
 
 
 class Bgp_Facts(object):

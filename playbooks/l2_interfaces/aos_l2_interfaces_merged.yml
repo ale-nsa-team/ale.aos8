@@ -8,7 +8,7 @@
     ansible_aos_flash_synchro_flag : false
   tasks:
     - name: Run L2 interfaces resource module with state merged
-      alcatel.aos8.aos8_l2_interfaces:
+      ale.aos8.aos8_l2_interfaces:
         config:
           - vlan_id: 20
             port_type: port

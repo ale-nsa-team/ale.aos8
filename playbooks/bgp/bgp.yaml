@@ -1,5 +1,5 @@
                                                                                                                                                                
-- name: Configure BGP on Alcatel devices
+- name: Configure BGP on Alcatel-Lucent Enterprise devices
   gather_facts: false
   connection: network_cli
   hosts: all
@@ -14,7 +14,7 @@
         var: current_config
 
     - name: Configure BGP
-      alcatel.aos8.aos8_bgp:
+      ale.aos8.aos8_bgp:
         config:
           as_number: "100"
           bgp_admin_state: enable
@@ -34,7 +34,7 @@
         var: new_config
 
         ------------------------------------------------------
-- name: Configure BGP on Alcatel devices
+- name: Configure BGP on Alcatel-Lucent Enterprise devices
   gather_facts: false
   connection: network_cli
   hosts: all
@@ -45,7 +45,7 @@
       register: current_config
 
     - name: Configure BGP
-      alcatel.aos8.aos8_bgp:
+      ale.aos8.aos8_bgp:
         config:
           as_number: "300"
           bgp_admin_state: "enable"

@@ -8,7 +8,7 @@
     ansible_aos_flash_synchro_flag : false
   tasks:
     - name: Run VLAN resource module with state merged
-      alcatel.aos8.aos8_vlans:
+      ale.aos8.aos8_vlans:
         config:
           - vlan_id: 33
             name: "Vlan 33"
@@ -19,7 +19,7 @@
             admin: enable
         state: merged
     - name: Run VLAN resource module with state deleted
-      alcatel.aos8.aos8_vlans:
+      ale.aos8.aos8_vlans:
         config:
           - vlan_id: 33
           - vlan_id: 99

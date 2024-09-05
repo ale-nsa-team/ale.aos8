@@ -19,7 +19,7 @@ description: 'Manages <xxxx> attributes of <network_os> <resource>'
 version_added: 1.0.0
 author: Samuel Yip Kah Yean (@samuelyip74)
 notes:
-  - Tested against Alcatel-Lucent AOS8 OmniSwitch with Version 8.9.221.R03 GA.
+  - Tested against Alcatel-Lucent AOS 8 OmniSwitch with Version 8.9.221.R03 GA.
 options:
   config:
     description: The provided configuration
@@ -95,10 +95,10 @@ parsed:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.hostname.hostname import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.hostname.hostname import (
     HostnameArgs,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.config.hostname.hostname import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.hostname.hostname import (
     Hostname,
 )
 

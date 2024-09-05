@@ -21,10 +21,10 @@ from ansible.module_utils.six import iteritems
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import (
     utils,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.rm_templates.hostname import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.rm_templates.hostname import (
     HostnameTemplate,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.hostname.hostname import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.hostname.hostname import (
     HostnameArgs,
 )
 

@@ -8,7 +8,7 @@
     ansible_aos_flash_synchro_flag : true
   tasks:
     - name: Run L2 interfaces resource module with state deleted
-      alcatel.aos8.aos8_l3_interfaces:
+      ale.aos8.aos8_l3_interfaces:
         config:
           - name: intvl33
             address: 192.168.33.1

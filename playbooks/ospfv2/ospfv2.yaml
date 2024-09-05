@@ -1,4 +1,4 @@
-- name: Configure OSPF on Alcatel devices
+- name: Configure OSPF on Alcatel-Lucent Enterprise devices
   gather_facts: false
   connection: network_cli
   hosts: all
@@ -9,7 +9,7 @@
       register: current_config
 
     - name: Configure OSPF
-      alcatel.aos8.aos8_ospfv2:
+      ale.aos8.aos8_ospfv2:
         config:
           admin_state: enable
           areas:

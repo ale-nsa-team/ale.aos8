@@ -16,10 +16,10 @@ __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.ntp.ntp import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.ntp.ntp import (
     Ntp_Args,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.config.ntp.ntp import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.ntp.ntp import (
     Ntp,
 )
 
