@@ -66,7 +66,7 @@ The following example task replaces configuration changes in the existing config
 ```yaml
 ---
   - name: Disable a port.
-    ale.aos8.aos_command:
+    ale.aos8.aos8_command:
       commands:
         - interfaces port 1/1/1 admin-state disable
 ```
