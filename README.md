@@ -60,7 +60,7 @@ This collection includes [network resource modules](https://docs.ansible.com/ans
 
 ### Using modules from the Alcatel-Lucent Enterprise AOS 8 collection in your playbooks
 
-You can call modules by their Fully Qualified Collection Namespace (FQCN), such as `alcatel.aos8.aos8_command`.
+You can call modules by their Fully Qualified Collection Namespace (FQCN), such as `ale.aos8.aos8_command`.
 The following example task replaces configuration changes in the existing configuration on a Alcatel-Lucent Enterprise AOS 8 network device, using the FQCN:
 
 ```yaml

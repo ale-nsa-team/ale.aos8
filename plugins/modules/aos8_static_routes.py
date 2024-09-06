@@ -36,10 +36,10 @@ __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.static_routes.static_routes import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.static_routes.static_routes import (
     Static_routesArgs,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.config.static_routes.static_routes import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.static_routes.static_routes import (
     Static_routes,
 )
 

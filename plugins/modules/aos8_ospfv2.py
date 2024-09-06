@@ -1,9 +1,9 @@
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.ospfv2.ospfv2 import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.ospfv2.ospfv2 import (
     OspfV2_Args,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.config.ospfv2.ospfv2 import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.ospfv2.ospfv2 import (
     Ospfv2,
 )
 

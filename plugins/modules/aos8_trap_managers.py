@@ -25,14 +25,14 @@ __metaclass__ = type
 
 DOCUMENTATION = """
 module: aos8_radius_servers
-short_description: Resource module to configure VLAN membership on AOS8 devices
+short_description: Resource module to configure VLAN membership on AOS 8 devices
 description:
-  This module provides declarative management of l2 interfaces on Alcatel AOS8 network
+  This module provides declarative management of l2 interfaces on Alcatel-Lucent Enterprise AOS 8 network
   devices.
 version_added: 1.0.0
 author: Samuel Yip Kah Yean (@samuelyip74)
 notes:
-  - Tested against Alcatel-Lucent AOS8 OmniSwitch with Version 8.9.221.R03 GA.
+  - Tested against Alcatel-Lucent Enterprise AOS 8 OmniSwitch with Version 8.9.221.R03 GA.
   - This module works with connection C(network_cli).
 options:
   config:
@@ -129,7 +129,7 @@ EXAMPLES = """
     ansible_aos_flash_synchro_flag : true
   tasks:
     - name: Run L2 interfaces resource module with state merged
-      alcatel.aos8.aos8_l2_interfaces:
+      ale.aos8.aos8_l2_interfaces:
         config:
           - vlan_id: 10
             port_type: port
@@ -209,7 +209,7 @@ EXAMPLES = """
     ansible_aos_flash_synchro_flag : true
   tasks:
     - name: Run L2 interfaces resource module with state overridden
-      alcatel.aos8.aos8_l2_interfaces:
+      ale.aos8.aos8_l2_interfaces:
         config:
           - vlan_id: 1
             port_type: port
@@ -293,7 +293,7 @@ EXAMPLES = """
     ansible_aos_flash_synchro_flag : false
   tasks:
     - name: Run L2 interfaces resource module with state deleted
-      alcatel.aos8.aos8_l2_interfaces:
+      ale.aos8.aos8_l2_interfaces:
         config:
           - vlan_id: 10
             mode: tagged
@@ -372,7 +372,7 @@ EXAMPLES = """
     ansible_aos_flash_synchro_flag : true
   tasks:
     - name: Run L2 interfaces resource module with state rendered
-      alcatel.aos8.aos8_l2_interfaces:
+      ale.aos8.aos8_l2_interfaces:
         config:
           - vlan_id: 10
             port_type: port
@@ -428,10 +428,10 @@ commands:
 """
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.trap_managers.trap_managers import (
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.trap_managers.trap_managers import (
     Trap_managersArgs,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.config.trap_managers.trap_managers import Trap_managers
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.trap_managers.trap_managers import Trap_managers
 
 
 def main():

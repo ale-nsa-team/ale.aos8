@@ -78,8 +78,8 @@ See the respective resource module parameters for the tree.
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.facts.facts import FactsArgs
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.facts import Facts
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.facts.facts import FactsArgs
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.facts import Facts
 
 def main():
     """
