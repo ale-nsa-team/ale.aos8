@@ -31,6 +31,7 @@ Name | Description
 Name | Description
 --- | ---
 [ale.aos8_command](https://github.com/ale-nsa-team/ale.aos8/blob/main/docs/ale.aos8_command_module.rst)|Module to run commands on remote devices.
+[ale.aos.aos_config](https://github.com/ale-nsa-team/ale.aos/blob/main/docs/ale.aos.aos_config_module.rst)|Manage Alcatel-Lucent Enterprise AOS configuration sections.
 [ale.aos8_facts](https://github.com/ale-nsa-team/ale.aos8/blob/main/docs/ale.aos8_facts_module.rst)|Module to collect facts from remote devices.
 [ale.aos8_hostname](https://github.com/ale-nsa-team/ale.aos8/blob/main/docs/ale.aos8_hostname_module.rst)|Resource module to configure hostname.
 [ale.aos8_switch_security](https://github.com/ale-nsa-team/ale.aos8/blob/main/docs/ale.aos8_switch_security.rst)|Resource module to configure switch security.
