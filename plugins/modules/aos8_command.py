@@ -32,7 +32,7 @@ description:
   - This module does not automatically save the configuration into memory and flash. 
 version_added: 1.0.0
 notes:
-  - Tested against Alcatel-Lucent Enterprise AOS 8 8.9.221.R03 GA.
+  - Tested against Alcatel-Lucent Enterprise AOS 8.9.221.R03 GA.
   - This module works with connection C(network_cli).
     See U(https://docs.ansible.com/ansible/latest/network/user_guide/platform_aos8.html)
 options:
