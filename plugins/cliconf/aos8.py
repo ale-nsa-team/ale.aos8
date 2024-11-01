@@ -260,7 +260,7 @@ class Cliconf(CliconfBase):
         # check if device is running configuration from working directory.
         if device_running_directory_state is None:
             raise ValueError("Device not ready!")
-        elif device_running_directory_state == "WORKING":
+        elif device_running_directory_state != "CERTIFIED":
             for line in to_list(candidate):
                 if not isinstance(line, Mapping):
                     line = {"command": line}
