@@ -51,8 +51,7 @@ Click the ``Content`` button to see the list of content included in this collect
 
 You can install the Alcatel-Lucent Enterprise AOS 8 collection with the Ansible Galaxy CLI:
 
-    git clone https://github.com/ale-nsa-team/ale.aos8.git
-    cd ale.aos8
+    wget https://github.com/ale-nsa-team/ale.aos8/releases/download/v1.0.0/ale-aos8-1.0.0.tar.gz
     ansible-galaxy collection install ./ale-aos8-1.0.0.tar.gz
 
 ## Using this collection
