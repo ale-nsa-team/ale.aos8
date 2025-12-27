@@ -77,17 +77,17 @@ class Radius_serversFacts(object):
         config = data.split("\n")
 
         for conf in config:
-            match = re.match("^aaa\sradius-server\s\"(?P<name>(\w+))\"\shost\s(?P<host> .*retransmit\s(?P<retransmit>[\d]+)\stimeout\s(?P<timeout>[\d]+)\sauth-port\s(?P<auth_port>[\d]+)\sacct-port\s(?P<acct_port>[\d]+)\svrf-name\s(?P<vrfname>(\w+))", conf)
+            match = re.match("^aaa\sradius-server\s\"(?P<name>(\w+))\"\shost\s(?P<host> .*)retransmit\s(?P<retransmit>[\d]+)\stimeout\s(?P<timeout>[\d]+)\sauth-port\s(?P<auth_port>[\d]+)\sacct-port\s(?P<acct_port>[\d]+)\svrf-name\s(?P<vrfname>(\w+))", conf)
             if match:
                 members_obj = {
                     'name'          :   match.group('name'),
-                    'host'          :   match.group('host'),   
+                    'host'          :   match.group('host'),
                     'retransmit'    :   match.group('retransmit'),
                     'timeout'       :   match.group('timeout'),
                     'auth_port'     :   match.group('auth_port'),
                     'acct_port'     :   match.group('acct_port'),
                     'vrf'           :   match.group('vrfname'),
                 }
-                objs.append(members_obj)                   
-                
+                objs.append(members_obj)
+
         return objs
