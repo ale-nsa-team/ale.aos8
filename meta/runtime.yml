@@ -1,0 +1,50 @@
+---
+requires_ansible: ">=2.15.0"
+
+action_groups:
+  aos8:
+    - aos8_bgp
+    - aos8_command
+    - aos8_config
+    - aos8_facts
+    - aos8_hostname
+    - aos8_l2_interfaces
+    - aos8_l3_interfaces
+    - aos8_ntp
+    - aos8_ospfv2
+    - aos8_radius_servers
+    - aos8_static_routes
+    - aos8_switch_security
+    - aos8_trap_managers
+    - aos8_vlans
+
+plugin_routing:
+  action:
+    aos8_bgp:
+      redirect: ale.aos8.aos8
+    aos8_command:
+      redirect: ale.aos8.aos8
+    aos8_config:
+      redirect: ale.aos8.aos8
+    aos8_facts:
+      redirect: ale.aos8.aos8
+    aos8_hostname:
+      redirect: ale.aos8.hostname
+    aos8_l2_interfaces:
+      redirect: ale.aos8.aos8
+    aos8_l3_interfaces:
+      redirect: ale.aos8.aos8
+    aos8_ntp:
+      redirect: ale.aos8.aos8
+    aos8_ospfv2:
+      redirect: ale.aos8.aos8
+    aos8_radius_servers:
+      redirect: ale.aos8.aos8
+    aos8_static_routes:
+      redirect: ale.aos8.aos8
+    aos8_switch_security:
+      redirect: ale.aos8.aos8
+    aos8_trap_managers:
+      redirect: ale.aos8.aos8
+    aos8_vlans:
+      redirect: ale.aos8.aos8
