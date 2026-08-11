@@ -77,7 +77,7 @@ class Trap_managersFacts(object):
         config = data.split("\n")
 
         for conf in config:
-            match = re.match("^^snmp\sstation\s(?P<host>[\d.]+)\s(?P<port>[\d]+)\s\"(?P<string>(\w)+)\"\s(?P<version>v1|v2|v3)\s(?P<state>enable|disable)", conf)
+            match = re.match(r'^^snmp\sstation\s(?P<host>[\d.]+)\s(?P<port>[\d]+)\s"(?P<string>(\w)+)"\s(?P<version>v1|v2|v3)\s(?P<state>enable|disable)', conf)
             if match:
                 members_obj = {
                     'host'          :   match.group('host'),   

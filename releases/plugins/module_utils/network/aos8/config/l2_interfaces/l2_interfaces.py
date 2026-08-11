@@ -278,7 +278,7 @@ class L2_interfaces(ConfigBase):
             mode = dict(want).get("mode")
 
             if port_type:
-                if re.match('(\d)+\/(\d)+\/(\d)+', port_number):
+                if re.match(r'(\d)+\/(\d)+\/(\d)+', port_number):
                     port_type_attr = 'port'
                 else:
                     port_type_attr = 'linkagg'
@@ -294,7 +294,7 @@ class L2_interfaces(ConfigBase):
         vlan_id = dict(have).get("vlan_id")
         mode = dict(have).get("mode")        
         if port_type:
-            if re.match('(\d)+\/(\d)+\/(\d)+', port_number):
+            if re.match(r'(\d)+\/(\d)+\/(\d)+', port_number):
                 port_type_attr = 'port'
             else:
                 port_type_attr = 'linkagg'        

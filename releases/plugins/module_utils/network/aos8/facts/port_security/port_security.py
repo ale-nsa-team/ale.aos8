@@ -80,7 +80,7 @@ class Port_securityFacts(object):
         config = data.split("\n")
 
         for conf in config:
-            isport = re.match("^port-security\sport\s(?P<port_number>[a-zA-Z0-9\/]+)\s", conf)
+            isport = re.match(r"^port-security\sport\s(?P<port_number>[a-zA-Z0-9\/]+)\s", conf)
             if isport:
                 port_number = isport.group('port_number')
                 if port_number not in ports: # catch unique port_number
@@ -88,12 +88,12 @@ class Port_securityFacts(object):
                     port_obj = {
                         'port_number' : port_number
                     }                    
-                    reg_exp = port_number.replace("/", "\/")
+                    reg_exp = port_number.replace("/", r"\/")
                     for eachline in config:
-                        mac = re.match("^port-security\sport\s(" + reg_exp + ")\smac\s(?P<address>[a-fA-F0-9:]+)\svlan\s(?P<vlan_id>(\d+))", eachline)
-                        max_filtering = re.match("^port-security\sport\s(" + reg_exp + ")\smax-filtering\s(?P<filtering>(\w)+)",eachline)
-                        violation = re.match("^port-security\sport\s(" + reg_exp + ")\sviolation\s(?P<violation>(\w)+)",eachline)
-                        state = re.match("^port-security\sport\s(" + reg_exp + ")\sadmin-state\s(?P<state>(\w)+)",eachline)
+                        mac = re.match(r"^port-security\sport\s(" + reg_exp + r")\smac\s(?P<address>[a-fA-F0-9:]+)\svlan\s(?P<vlan_id>(\d+))", eachline)
+                        max_filtering = re.match(r"^port-security\sport\s(" + reg_exp + r")\smax-filtering\s(?P<filtering>(\w)+)",eachline)
+                        violation = re.match(r"^port-security\sport\s(" + reg_exp + r")\sviolation\s(?P<violation>(\w)+)",eachline)
+                        state = re.match(r"^port-security\sport\s(" + reg_exp + r")\sadmin-state\s(?P<state>(\w)+)",eachline)
                         if mac:
                             mac_address = {
                                 "address" : mac.group('address'),
