@@ -77,7 +77,7 @@ class Switch_securityFacts(object):
         config = data.split("\n")
 
         for conf in config:
-            match = re.match("^aaa\sauthentication\s(?P<access_method>(\w)+)\s\"(?P<aaa_servers_name>(\w)+)\"", conf)
+            match = re.match(r'^aaa\sauthentication\s(?P<access_method>(\w)+)\s"(?P<aaa_servers_name>(\w)+)"', conf)
             if match:
                 members_obj = {
                     'access_method'      :   match.group('access_method'),

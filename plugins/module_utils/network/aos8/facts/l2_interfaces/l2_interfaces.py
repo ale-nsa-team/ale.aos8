@@ -77,10 +77,10 @@ class L2_interfacesFacts(object):
         config = data.split("\n")
         # Get individual vlan configs separately
         for conf in config:
-            match = re.match("^^\s+(?P<vlan_id>[\d]+)\s+(?P<port_number>(\d+\/\S+))\s+(?P<port_type>untagged|tagged)\s+(?P<status>.*)$", conf)
+            match = re.match(r"^^\s+(?P<vlan_id>[\d]+)\s+(?P<port_number>(\d+\/\S+))\s+(?P<port_type>untagged|tagged)\s+(?P<status>.*)$", conf)
             if match:
                 port_number = match.group('port_number')
-                if re.match('(\d)+\/(\d)+\/(\d)+', port_number):
+                if re.match(r'(\d)+\/(\d)+\/(\d)+', port_number):
                     port_type = 'port'
                 else:
                     port_type = 'linkagg'
