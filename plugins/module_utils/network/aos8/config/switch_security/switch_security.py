@@ -104,7 +104,8 @@ class Switch_security(ConfigBase):
         elif self.state == "gathered":
             result["gathered"] = changed_switch_security_facts
 
-        result["warnings"] = warnings
+        for warning in warnings:
+            self._module.warn(warning)
         return result
 
     def set_config(self, existing_switch_security_facts):

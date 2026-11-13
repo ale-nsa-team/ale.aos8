@@ -104,7 +104,8 @@ class Trap_managers(ConfigBase):
         elif self.state == "gathered":
             result["gathered"] = changed_trap_servers_facts
 
-        result["warnings"] = warnings
+        for warning in warnings:
+            self._module.warn(warning)
         return result
 
     def set_config(self, existing_trap_managers_facts):
