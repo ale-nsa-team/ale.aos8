@@ -1,581 +1,278 @@
 #!/usr/bin/python
-#
-# This file is part of Ansible
-#
-# Ansible is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Ansible is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
-#
+# -*- coding: utf-8 -*-
+# Copyright (c) Alcatel-Lucent Enterprise
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 """
 The module file for aos8_vlans
 """
+
 from __future__ import absolute_import, division, print_function
 
 
 __metaclass__ = type
 
-DOCUMENTATION = """
+DOCUMENTATION = r"""
+---
 module: aos8_vlans
-short_description: Resource module to configure VLANs on AOS 8 devices
+short_description: Resource module to configure VLANs
 description:
-  This module provides declarative management of VLANs on Alcatel-Lucent Enterprise AOS 8 network
-  devices.
+  - This module manages standard VLANs on Alcatel-Lucent Enterprise OmniSwitch devices running AOS 8.
+  - VLAN 1 is the default VLAN of the switch. It is never removed.
 version_added: 1.0.0
-author: Samuel Yip Kah Yean (@samuelyip74)
+author:
+  - Samuel Yip Kah Yean (@samuelyip74)
+  - Mathias Guillemot (@mathias-gt)
 notes:
-  - Tested against Alcatel-Lucent Enterprise AOS 8 OmniSwitch with Version 8.9.221.R03 GA.
-  - This module works with connection C(network_cli).
+  - Tested against Alcatel-Lucent Enterprise OmniSwitch AOS 8.11.162.R01.
+  - This module works with connection C(ansible.netcommon.network_cli).
+  - After a change, the configuration is saved to flash with C(write memory flash-synchro), unless C(ansible_aos_write_memory_flash)
+    is set to C(false). Saving needs C(ansible_command_timeout) to be 60 seconds or more.
 options:
   config:
-    description: A dictionary of VLANs options
+    description:
+      - A list of VLANs.
     type: list
     elements: dict
     suboptions:
-      name:
-        description:
-          - Ascii name of the VLAN.
-          - NOTE, I(name) should not be named/appended with I(default) as it is reserved
-            for device default vlans.
-        type: str
       vlan_id:
         description:
-          - ID of the VLAN. Range 1-4094
+          - ID of the VLAN.
         type: int
         required: true
-      mtu:
+      name:
         description:
-          - VLAN Maximum Transmission Unit.
-          - Refer to vendor documentation for valid values.
-        type: int
+          - Description of the VLAN. The switch names a new VLAN C(VLAN <id>) when no name is given.
+        type: str
       admin:
         description:
-          - Administration state of the VLAN
+          - Administrative state of the VLAN. A new VLAN is created enabled.
+        type: str
+        choices:
+          - enable
+          - disable
+      mtu:
+        description:
+          - Maximum IP packet size of the VLAN, in bytes. The switch default is 1500.
+        type: int
+      operational_state:
+        description:
+          - Operational state of the VLAN. This value is read from the switch and returned by the module.
+            It is ignored when given in a task.
         type: str
         choices:
           - enable
           - disable
   running_config:
     description:
-      - This option is used only with state I(parsed).
-      - The value of this option should be the output received from the aos8 device
-        by executing the command B(show vlan).
-      - The state I(parsed) reads the configuration from C(running_config) option and
-        transforms it into Ansible structured data as per the resource module's argspec
-        and the value is then returned in the I(parsed) key within the result.
+      - Text to convert into structured data. Only used with O(state=parsed).
+      - Give the output of C(show vlan) from the switch.
     type: str
   state:
     description:
-      - The state the configuration should be left in
-      - The states I(rendered), I(gathered) and I(parsed) does not perform any change
-        on the device.
-      - The state I(rendered) will transform the configuration in C(config) option to
-        platform specific CLI commands which will be returned in the I(rendered) key
-        within the result. For state I(rendered) active connection to remote host is
-        not required.
-      - The state I(gathered) will fetch the running configuration from device and transform
-        it into structured data in the format as per the resource module argspec and
-        the value is returned in the I(gathered) key within the result.
-      - The state I(parsed) reads the configuration from C(running_config) option and
-        transforms it into JSON format as per the resource module parameters and the
-        value is returned in the I(parsed) key within the result. The value of C(running_config)
-        option should be the same format as the output of command I(show running-config
-        | include ip route|ipv6 route) executed on device. For state I(parsed) active
-        connection to remote host is not required.
+      - What the module does with the given configuration.
+      - C(merged) adds the given configuration to the switch and changes only the attributes that are
+        given.
+      - C(replaced) makes each given entry match the task exactly. Attributes that are left out go back
+        to their default value.
+      - C(overridden) makes the whole resource match the task. Entries found on the switch that are not
+        in the task are removed.
+      - C(deleted) removes the given entries. Without O(config), every entry of this resource is removed.
+      - C(gathered) reads the configuration from the switch and returns it as RV(gathered). Nothing is
+        changed.
+      - C(rendered) returns the commands for the given configuration as RV(rendered), without connecting
+        to the switch.
+      - C(parsed) converts the text given in O(running_config) into structured data, returned as RV(parsed),
+        without connecting to the switch.
     type: str
     choices:
       - merged
       - replaced
       - overridden
       - deleted
-      - rendered  
       - gathered
+      - rendered
       - parsed
     default: merged
 """
 
-EXAMPLES = """
-# Using merged
-
-# Before state:
-# -------------
-#
-# ACSW01-> show vlan
-#  vlan    type   admin   oper    ip    mtu          name
-# ------+-------+-------+------+------+------+------------------
-# 1      std       Ena     Ena   Ena    1500    MGNT
-
----
-- hosts: all
-  gather_facts: true
-  ignore_errors: true
-  tasks:
-    - name: Run merged VLAN with existing VLANs
-      ale.aos8.aos8_vlans:
-        config:
-          - vlan_id: 33
-            name: "Vlan 33"
-            admin: enable
-            mtu: 1280
-          - vlan_id: 99
-            name: "Vlan 99"
-            admin: enable
-      configuration: false
-      state: merged
-
-
-# After state:
-# ------------
-#
-# ACSW01-> show vlan
-#  vlan    type   admin   oper    ip    mtu          name
-# ------+-------+-------+------+------+------+------------------
-# 1      std       Ena     Ena   Ena    1500    MGNT
-# 33     std       Ena     Dis   Ena    1280    Vlan_33
-# 99     std       Ena     Dis   Dis    1500    Vlan_99
-
-# results
-# changed: [192.168.70.1] => {
-#     "after": [
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "MGNT",
-#             "operational_state": "enable",
-#             "vlan_id": 1
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1280,
-#             "name": "Vlan_33",
-#             "operational_state": "disable",
-#             "vlan_id": 33
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "Vlan_99",
-#             "operational_state": "disable",
-#             "vlan_id": 99
-#         },
-#     ],
-#     "before": [
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "MGNT",
-#             "operational_state": "enable",
-#             "vlan_id": 1
-#         },
-#     ],
-#     "changed": true,
-#     "commands": [
-#         "vlan 33 name Vlan_33",
-#         "vlan 33 admin-state enable",
-#         "vlan 33 mtu-ip 1280",
-#         "vlan 99 name Vlan_99",
-#         "vlan 99 admin-state enable",
-#         "vlan 99 mtu-ip 1500"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#                 {
-#                     "admin": "enable",
-#                     "mtu": 1280,
-#                     "name": "Vlan_33",
-#                     "operational_state": null,
-#                     "vlan_id": 33
-#                 },
-#                 {
-#                     "admin": "enable",
-#                     "mtu": 1500,
-#                     "name": "Vlan_99",
-#                     "operational_state": null,
-#                     "vlan_id": 99
-#                 }
-#             ],
-#             "configuration": false,
-#             "running_config": null,
-#             "state": "merged"
-#         }
-#     }
-# }
-
-# Using overridden
-
-# Before state:
-# -------------
-#
-# ACSW01-> show vlan
-#  vlan    type   admin   oper    ip    mtu          name
-# ------+-------+-------+------+------+------+------------------
-# 1      std       Ena     Ena   Ena    1500    MGNT
-# 33     std       Ena     Dis   Ena    1280    Vlan_33
-# 99     std       Ena     Dis   Dis    1500    Vlan_99
-
-# - name: Override device configuration of all VLANs with provided configuration
-#   ale.aos8.aos8_vlans:
-#     config:
-#       - vlan_id: 1
-#         name: MGNT
-#         mtu: 1500
-#       - vlan_id: 33
-#         name: Vlan_33
-#         mtu: 1280
-#     state: overridden
-
-# After state:
-# ------------
-#
-# ACSW01-> show vlan
-#  vlan    type   admin   oper    ip    mtu          name
-# ------+-------+-------+------+------+------+------------------
-# 1      std       Ena     Ena   Ena    1500    MGNT
-# 33     std       Ena     Dis   Ena    1280    Vlan_33
-
-#     "after": [
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "MGNT",
-#             "operational_state": "enable",
-#             "vlan_id": 1
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "Vlan_33",
-#             "operational_state": "enable",
-#             "vlan_id": 33
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "Vlan 99",
-#             "operational_state": "disable",
-#             "vlan_id": 99
-#         }
-#     ],
-#     "changed": true,
-#     "commands": [
-#         "no vlan 99"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "MGNT",
-#             "operational_state": "enable",
-#             "vlan_id": 1
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "Vlan_33",
-#             "operational_state": "enable",
-#             "vlan_id": 33
-#         },
-#             ],
-#             "running_config": null,
-#             "state": "overridden"
-#         }
-#     }
-# }
-
-# Using replaced
-
-# Before state:
-# -------------
-#
-# ACSW01-> show vlan
-#  vlan    type   admin   oper    ip    mtu          name
-# ------+-------+-------+------+------+------+------------------
-# 1      std       Ena     Ena   Ena    1500    MGNT
-# 33     std       Ena     Dis   Ena    1280    Vlan_33
-
-- name: Replaces device configuration of listed VLANs with provided configuration
+EXAMPLES = r"""
+- name: Create two VLANs
   ale.aos8.aos8_vlans:
     config:
-      - vlan_id: 33
-        name: "Vlan 33"
+      - vlan_id: 30
+        name: Voice
         admin: enable
-        mtu: 1500
-      - vlan_id: 99
-        name: "Vlan 99"
-        admin: enable
+        mtu: 9000
+      - vlan_id: 31
+    state: merged
+
+# Commands sent to the switch
+# ---------------------------
+# vlan 30 admin-state enable
+# vlan 30 name "Voice"
+# vlan 30 mtu-ip 9000
+# vlan 31 admin-state enable
+
+- name: Rename a VLAN and disable it
+  ale.aos8.aos8_vlans:
+    config:
+      - vlan_id: 31
+        name: Guest
+        admin: disable
+    state: merged
+
+# Commands sent to the switch
+# ---------------------------
+# vlan 31 admin-state disable
+# vlan 31 name "Guest"
+
+- name: Replace the configuration of VLAN 30 (the MTU goes back to 1500)
+  ale.aos8.aos8_vlans:
+    config:
+      - vlan_id: 30
+        name: Voice
     state: replaced
 
-# After state:
-# ------------
-#
-# ACSW01-> show vlan
-#  vlan    type   admin   oper    ip    mtu          name
-# ------+-------+-------+------+------+------+------------------
-# 1      std       Ena     Ena   Ena    1500    MGNT
-# 33     std       Ena     Dis   Ena    1280    Vlan_33
-# 99     std       Ena     Dis   Ena    1500    Vlan_99
+# Commands sent to the switch
+# ---------------------------
+# vlan 30 mtu-ip 1500
 
-#     "after": [
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "MGNT",
-#             "operational_state": "enable",
-#             "vlan_id": 1
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "Vlan 33",
-#             "operational_state": "disable",
-#             "vlan_id": 33
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "Vlan 99",
-#             "operational_state": "disable",
-#             "vlan_id": 99
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "Ucopia",
-#             "operational_state": "enable",
-#             "vlan_id": 200
-#         },
-#     ],
-#     "before": [
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "MGNT",
-#             "operational_state": "enable",
-#             "vlan_id": 1
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1280,
-#             "name": "Vlan 33",
-#             "operational_state": "disable",
-#             "vlan_id": 33
-#         },
-#     ],
-#     "changed": true,
-#     "commands": [
-#         "vlan 33 name \"Vlan 33\"",
-#         "vlan 33 admin-state enable",
-#         "vlan 33 mtu-ip 1500",
-#         "vlan 99 name \"Vlan 99\"",
-#         "vlan 99 admin-state enable",
-#         "vlan 99 mtu-ip 1500"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#                 {
-#                     "admin": "enable",
-#                     "mtu": 1500,
-#                     "name": "Vlan 33",
-#                     "operational_state": null,
-#                     "vlan_id": 33
-#                 },
-#                 {
-#                     "admin": "enable",
-#                     "mtu": 1500,
-#                     "name": "Vlan 99",
-#                     "operational_state": null,
-#                     "vlan_id": 99
-#                 }
-#             ],
-#             "running_config": null,
-#             "state": "replaced"
-#         }
-#     }
-# }
-
-# Using deleted
-
-# Before state:
-# -------------
-#
-# ACSW01-> show vlan
-#  vlan    type   admin   oper    ip    mtu          name
-# ------+-------+-------+------+------+------+------------------
-# 1      std       Ena     Ena   Ena    1500    MGNT
-# 33     std       Ena     Dis   Ena    1280    Vlan_33
-# 99     std       Ena     Dis   Ena    1500    Vlan_99
-
-  - name: Run VLAN resource module with state deleted
-    ale.aos8.aos8_vlans:
-      config:
-        - vlan_id: 33
-        - vlan_id: 99
-      state: deleted
-
-
-# After state:
-# -------------
-#
-# ACSW01-> show vlan
-#  vlan    type   admin   oper    ip    mtu          name
-# ------+-------+-------+------+------+------+------------------
-# 1      std       Ena     Ena   Ena    1500    MGNT
-
-#     "after": [
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "MGNT",
-#             "operational_state": "enable",
-#             "vlan_id": 1
-#         },
-#     ],
-#     "before": [
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "MGNT",
-#             "operational_state": "enable",
-#             "vlan_id": 1
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1280,
-#             "name": "Vlan 33",
-#             "operational_state": "disable",
-#             "vlan_id": 33
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "Vlan 99",
-#             "operational_state": "disable",
-#             "vlan_id": 99
-#         },
-#     ],
-#     "changed": true,
-#     "commands": [
-#         "no vlan 33",
-#         "no vlan 99"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#                 {
-#                     "admin": "enable",
-#                     "mtu": 1500,
-#                     "name": null,
-#                     "operational_state": null,
-#                     "vlan_id": 33
-#                 },
-#                 {
-#                     "admin": "enable",
-#                     "mtu": 1500,
-#                     "name": null,
-#                     "operational_state": null,
-#                     "vlan_id": 99
-#                 }
-#             ],
-#             "running_config": null,
-#             "state": "deleted"
-#         }
-#     }
-# }
-
-
-# Using Gathered
-
-# Before state:
-# -------------
-#
-# ACSW01-> show vlan
-#  vlan    type   admin   oper    ip    mtu          name
-# ------+-------+-------+------+------+------+------------------
-# 1      std       Ena     Ena   Ena    1500    MGNT
-# 33     std       Ena     Dis   Ena    1280    Vlan_33
-# 99     std       Ena     Dis   Ena    1500    Vlan_99
-
-- name: Gather listed vlans with provided configurations
+- name: Read the VLANs from the switch
   ale.aos8.aos8_vlans:
-    config:
-    configuration: true
     state: gathered
 
-#  "changed": false,
-#     "gathered": [
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "MGNT",
-#             "operational_state": "enable",
-#             "vlan_id": 1
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "Vlan_33",
-#             "operational_state": "enable",
-#             "vlan_id": 33
-#         },
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "Vlan_99",
-#             "operational_state": "enable",
-#             "vlan_id": 99
-#         },
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": null,
-#             "running_config": null,
-#             "state": "gathered"
-#         }
-#     }
-# }
+- name: Keep only VLAN 10 and VLAN 30 (every other VLAN except VLAN 1 is removed)
+  ale.aos8.aos8_vlans:
+    config:
+      - vlan_id: 10
+        name: VAL-ISL
+      - vlan_id: 30
+        name: Voice
+    state: overridden
 
+# Commands sent to the switch (other entries found on the switch are removed in the same way)
+# -------------------------------------------------------------------------------------------
+# no vlan 31
 
+- name: Show the commands for a VLAN without connecting to the switch
+  ale.aos8.aos8_vlans:
+    config:
+      - vlan_id: 998
+        name: Vlan 998
+        admin: disable
+    state: rendered
+
+# Value returned as rendered
+# --------------------------
+# - vlan 998 admin-state disable
+# - vlan 998 name "Vlan 998"
+
+- name: Convert the output of show vlan into structured data
+  ale.aos8.aos8_vlans:
+    running_config: |
+      vlan    type   admin   oper    ip    mtu          name
+      ------+-------+-------+------+------+------+------------------
+      1      std       Ena     Ena   Dis    1500    VLAN 1
+      20     std       Ena     Dis   Dis    1280    Users
+    state: parsed
+
+# Value returned as parsed
+# ------------------------
+# - vlan_id: 1
+#   name: VLAN 1
+#   admin: enable
+#   mtu: 1500
+#   operational_state: enable
+# - vlan_id: 20
+#   name: Users
+#   admin: enable
+#   mtu: 1280
+#   operational_state: disable
+
+- name: Remove VLAN 30
+  ale.aos8.aos8_vlans:
+    config:
+      - vlan_id: 30
+    state: deleted
+
+# Commands sent to the switch
+# ---------------------------
+# no vlan 30
+
+- name: Remove every VLAN except VLAN 1
+  ale.aos8.aos8_vlans:
+    state: deleted
+
+# Commands sent to the switch (other entries found on the switch are removed in the same way)
+# -------------------------------------------------------------------------------------------
+# no vlan 10
 """
 
-RETURN = """
+RETURN = r"""
+---
 before:
-  description: The configuration as structured data prior to module invocation.
-  returned: always
+  description: The configuration found on the switch before the module ran.
+  returned: when O(state) is C(merged) or C(replaced) or C(overridden) or C(deleted)
   type: list
-  sample: >
-    The configuration returned will always be in the same format
-     of the parameters above.
+  elements: dict
+  sample: The configuration in the format of the O(config) option.
 after:
-  description: The configuration as structured data after module completion.
-  returned: when changed
+  description: The configuration found on the switch after the module ran.
+  returned: when the module changed the switch
   type: list
-  sample: >
-    The configuration returned will always be in the same format
-     of the parameters above.
+  elements: dict
+  sample: The configuration in the format of the O(config) option.
 commands:
-  description: The set of commands pushed to the remote device.
-  returned: always
+  description: The commands sent to the switch. In check mode, the commands that would be sent.
+  returned: when O(state) is C(merged) or C(replaced) or C(overridden) or C(deleted)
   type: list
-  sample: ['vlan 20', 'vlan 20 name vlan_20']
+  elements: str
+  sample:
+    - vlan 30 admin-state enable
+    - vlan 30 name "Voice"
+    - vlan 30 mtu-ip 9000
+    - vlan 31 admin-state enable
+gathered:
+  description: The configuration read from the switch.
+  returned: when O(state) is C(gathered)
+  type: list
+  elements: dict
+  sample: The configuration in the format of the O(config) option.
+parsed:
+  description: The structured data built from O(running_config).
+  returned: when O(state) is C(parsed)
+  type: list
+  elements: dict
+  sample:
+    - vlan_id: 1
+      name: VLAN 1
+      admin: enable
+      mtu: 1500
+      operational_state: enable
+    - vlan_id: 20
+      name: Users
+      admin: enable
+      mtu: 1280
+      operational_state: disable
+rendered:
+  description: The commands for the given configuration.
+  returned: when O(state) is C(rendered)
+  type: list
+  elements: str
+  sample:
+    - vlan 998 admin-state disable
+    - vlan 998 name "Vlan 998"
 """
+
 from ansible.module_utils.basic import AnsibleModule
 
 from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.vlans.vlans import (
     VlansArgs,
 )
-from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.vlans.vlans import Vlans
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.vlans.vlans import (
+    Vlans,
+)
 
 
 def main():
@@ -584,24 +281,22 @@ def main():
 
     :returns: the result form module invocation
     """
-    required_if = [
-        ("state", "merged", ("config",)),
-        ("state", "replaced", ("config",)),
-        ("state", "overridden", ("config",)),
-        ("state", "rendered", ("config",)),           ### TODO: yet to be implemented
-        ("state", "parsed", ("running_config",)),     ### TODO: yet to be implemented
-    ]
-    mutually_exclusive = [("config", "running_config")]
-
     module = AnsibleModule(
         argument_spec=VlansArgs.argument_spec,
-        required_if=required_if,
-        mutually_exclusive=mutually_exclusive,
+        mutually_exclusive=[["config", "running_config"]],
+        required_if=[
+            ["state", "merged", ["config"]],
+            ["state", "replaced", ["config"]],
+            ["state", "overridden", ["config"]],
+            ["state", "rendered", ["config"]],
+            ["state", "parsed", ["running_config"]],
+        ],
         supports_check_mode=True,
     )
 
     result = Vlans(module).execute_module()
     module.exit_json(**result)
+
 
 if __name__ == "__main__":
     main()

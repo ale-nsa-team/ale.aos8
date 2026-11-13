@@ -1,0 +1,4 @@
+! NTP:
+ntp server 192.168.121.250
+ntp server 192.168.121.251 prefer
+ntp server 192.168.121.252

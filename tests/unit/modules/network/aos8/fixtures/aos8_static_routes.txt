@@ -1,0 +1,10 @@
+! IP Route Manager:
+ip static-route 172.31.251.0/24 interface int_20 metric 1 
+ip static-route 172.31.252.0/24 gateway 10.10.10.2 metric 1 
+ip static-route 172.31.253.0/24 gateway 10.10.10.2 metric 1 tag 7 name "valroute"
+ip static-route 172.31.254.0/24 gateway 10.10.10.2 metric 5 
+ip static-route 172.31.255.0/24 gateway 10.10.10.2 metric 1 
+
+! VRF:
+vrf create vrf-val
+! IP Route Manager:

@@ -1,0 +1,190 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+    - no vlan 41
+    - no vlan 42
+    - no vlan 43
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Send configuration lines
+      ale.aos8.aos8_config:
+        lines:
+          - vlan 41 admin-state enable
+          - vlan 41 name "Printers"
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 41 admin-state enable', 'vlan 41 name "Printers"']
+          - result.updates == result.commands
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Send configuration lines (run again: nothing changes)'
+      ale.aos8.aos8_config:
+        lines:
+          - vlan 41 admin-state enable
+          - vlan 41 name "Printers"
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - '''commands'' not in result'
+    - name: Send every line without comparing, with a command before and after
+      ale.aos8.aos8_config:
+        commands:
+          - vlan 41 admin-state enable
+        match: none
+        before:
+          - vlan 42 admin-state enable
+        after:
+          - vlan 43 admin-state enable
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 42 admin-state enable', 'vlan 41 admin-state enable', 'vlan 43 admin-state enable']
+        fail_msg: '{{ result | to_json }}'
+    - name: Send the lines of a template with a lookup, and back up the configuration first
+      ale.aos8.aos8_config:
+        lines: '{{ lookup(''ansible.builtin.template'', ''aos8_config_lines.j2'').splitlines() }}'
+        backup: true
+        backup_options:
+          filename: aos8_config_example.cfg
+          dir_path: /tmp/aos8_backup
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 42 name "Cameras"', 'vlan 43 name "Sensors"']
+          - result.backup_path == '/tmp/aos8_backup/aos8_config_example.cfg'
+          - '''vlan 41'' in lookup(''ansible.builtin.file'', ''/tmp/aos8_backup/aos8_config_example.cfg'')'
+        fail_msg: '{{ result | to_json }}'
+    - name: Send the lines of a template file
+      ale.aos8.aos8_config:
+        src: aos8_config_example.j2
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 43 name "Sensors ' ~ inventory_hostname ~ '"']
+        fail_msg: '{{ result | to_json }}'
+    - name: Compare the lines with a configuration given in the task
+      ale.aos8.aos8_config:
+        lines:
+          - vlan 42 admin-state enable
+          - vlan 44 admin-state enable
+        running_config: |
+          vlan 44 admin-state enable
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 42 admin-state enable']
+        fail_msg: '{{ result | to_json }}'
+    - name: Show what a change would do, in check mode with a diff
+      ale.aos8.aos8_config:
+        lines:
+          - vlan 43 name "Lab"
+        diff_ignore_lines:
+          - ^! .*
+      check_mode: true
+      diff: true
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 43 name "Lab"']
+          - '''diff'' not in result or result.diff is not none'
+        fail_msg: '{{ result | to_json }}'
+    - name: Check that check mode did not change the switch
+      ale.aos8.aos8_command:
+        commands: show vlan
+      register: result
+    - name: Check the VLAN name
+      ansible.builtin.assert:
+        that:
+          - '''Sensors '' ~ inventory_hostname in result.stdout[0]'
+          - '''Lab'' not in result.stdout[0]'
+    - name: Compare the switch with an intended configuration
+      ale.aos8.aos8_config:
+        diff_against: intended
+        intended_config: |
+          vlan 43 admin-state enable
+          vlan 43 name "Intended"
+      diff: true
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.diff is defined
+        fail_msg: '{{ result | to_json }}'
+    - name: Save the configuration when the task changes it
+      ale.aos8.aos8_config:
+        lines:
+          - vlan 43 name "Lab"
+        save_when: changed
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 43 name "Lab"']
+        fail_msg: '{{ result | to_json }}'
+    - name: Save the configuration only when it is not saved yet
+      ale.aos8.aos8_config:
+        save_when: modified
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+        fail_msg: '{{ result | to_json }}'
+    - name: Save the configuration at every run
+      ale.aos8.aos8_config:
+        save_when: always
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is changed
+        fail_msg: '{{ result | to_json }}'
+    - name: Never save the configuration (the default)
+      ale.aos8.aos8_config:
+        lines:
+          - vlan 43 admin-state enable
+        config: |
+          vlan 43 admin-state enable
+        save_when: never
+        match: line
+        backup: false
+        diff_against: running
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+        - no vlan 41
+        - no vlan 42
+        - no vlan 43
+      changed_when: false
+      failed_when: false

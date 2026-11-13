@@ -1,0 +1,17 @@
+---
+- name: "Target {{ target }}"
+  block:
+    - name: "Run {{ target }}"
+      ansible.builtin.include_role:
+        name: "{{ target }}"
+
+    - name: "Record success of {{ target }}"
+      ansible.builtin.set_fact:
+        lab_results: "{{ lab_results | default({}) | combine({target: 'ok'}) }}"
+  rescue:
+    - name: "Record failure of {{ target }}"
+      ansible.builtin.set_fact:
+        lab_results: >-
+          {{ lab_results | default({}) | combine({target: 'FAILED at task "' ~ ansible_failed_task.name ~ '": '
+          ~ (ansible_failed_result.msg | default('') | string | truncate(1500))
+          ~ (' (check: ' ~ ansible_failed_result.assertion ~ ')' if ansible_failed_result.assertion is defined else '')}) }}

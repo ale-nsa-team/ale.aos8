@@ -1,12 +1,9 @@
-.. _ale.aos8.aos8_static_routes:
+.. _ale.aos8.aos8_static_routes_module:
 
-
-****************************
 ale.aos8.aos8_static_routes
-****************************
+***************************
 
-**Static routes resource module**
-
+**Resource module to configure IPv4 static routes**
 
 Version added: 1.0.0
 
@@ -14,399 +11,228 @@ Version added: 1.0.0
    :local:
    :depth: 1
 
-
 Synopsis
 --------
-- This module configures and manages the attributes of static routes on Arista EOS platforms.
 
-
-
+- This module manages IPv4 static routes of the default VRF on Alcatel-Lucent Enterprise OmniSwitch devices running AOS 8.
+- The tag and name of an existing route cannot be changed in place. The module removes the route and creates it again when one of its attributes changes.
 
 Parameters
 ----------
 
-.. raw:: html
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 20 44
 
-    <table  border=0 cellpadding=0 class="documentation-table">
-        <tr>
-            <th colspan="5">Parameter</th>
-            <th>Choices/<font color="blue">Defaults</font></th>
-            <th width="100%">Comments</th>
-        </tr>
-            <tr>
-                <td colspan="5">
-                    <div class="ansibleOptionAnchor" id="parameter-"></div>
-                    <b>config</b>
-                    <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
-                    <div style="font-size: small">
-                        <span style="color: purple">list</span>
-                         / <span style="color: purple">elements=dictionary</span>
-                    </div>
-                </td>
-                <td>
-                </td>
-                <td>
-                        <div>A list of configurations for static routes.</div>
-                </td>
-            </tr>
-                                                     
-            <tr>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                <td colspan="3">
-                    <div class="ansibleOptionAnchor" id="parameter-"></div>
-                    <b>routes</b>
-                    <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
-                    <div style="font-size: small">
-                        <span style="color: purple">list</span>
-                         / <span style="color: purple">elements=dictionary</span>
-                    </div>
-                </td>
-                <td>
-                </td>
-                <td>
-                        <div>A dictionary that specifies the static route configurations.</div>
-                </td>
-            </tr>
-                                <tr>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                <td colspan="2">
-                    <div class="ansibleOptionAnchor" id="parameter-"></div>
-                    <b>dest</b>
-                    <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
-                    <div style="font-size: small">
-                        <span style="color: purple">string</span>
-                         / <span style="color: red">required</span>
-                    </div>
-                </td>
-                <td>
-                </td>
-                <td>
-                        <div>Destination IPv4 subnet (CIDR or address-mask notation).</div>
-                        <div>The address format is &lt;v4/v6 address&gt;/&lt;mask&gt; or &lt;v4/v6 address&gt; &lt;mask&gt;.</div>
-                        <div>The mask is number in range 0-32 for IPv4 and in range 0-128 for IPv6.</div>
-                </td>
-            </tr>
-            <tr>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                <td colspan="2">
-                    <div class="ansibleOptionAnchor" id="parameter-"></div>
-                    <b>next_hops</b>
-                    <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
-                    <div style="font-size: small">
-                        <span style="color: purple">list</span>
-                         / <span style="color: purple">elements=dictionary</span>
-                    </div>
-                </td>
-                <td>
-                </td>
-                <td>
-                        <div>Details of route to be taken.</div>
-                </td>
-            </tr>
-                                <tr>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                <td colspan="1">
-                    <div class="ansibleOptionAnchor" id="parameter-"></div>
-                    <b>admin_distance</b>
-                    <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
-                    <div style="font-size: small">
-                        <span style="color: purple">integer</span>
-                    </div>
-                </td>
-                <td>
-                </td>
-                <td>
-                        <div>Preference or administrative distance of route (range 1-255).</div>
-                </td>
-            </tr>
-            <tr>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                <td colspan="1">
-                    <div class="ansibleOptionAnchor" id="parameter-"></div>
-                    <b>description</b>
-                    <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
-                    <div style="font-size: small">
-                        <span style="color: purple">string</span>
-                    </div>
-                </td>
-                <td>
-                </td>
-                <td>
-                        <div>Name of the static route.</div>
-                </td>
-            </tr>
-            <tr>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                    <td class="elbow-placeholder"></td>
-                <td colspan="1">
-                    <div class="ansibleOptionAnchor" id="parameter-"></div>
-                    <b>forward_router_address</b>
-                    <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
-                    <div style="font-size: small">
-                        <span style="color: purple">string</span>
-                    </div>
-                </td>
-                <td>
-                </td>
-                <td>
-                        <div>Forwarding router&#x27;s address on destination interface.</div>
-                </td>
-            </tr>          
-        
-            <tr>
-                <td colspan="5">
-                    <div class="ansibleOptionAnchor" id="parameter-"></div>
-                    <b>state</b>
-                    <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
-                    <div style="font-size: small">
-                        <span style="color: purple">string</span>
-                    </div>
-                </td>
-                <td>
-                        <ul style="margin: 0; padding: 0"><b>Choices:</b>
-                                    <li>deleted</li>
-                                    <li><div style="color: blue"><b>merged</b>&nbsp;&larr;</div></li>
-                                    <li>overridden</li>
-                                    <li>replaced</li>
-                                    <li>gathered</li>
-                                    <li>rendered</li>
-                                    <li>parsed</li>
-                        </ul>
-                </td>
-                <td>
-                        <div>The state the configuration should be left in.</div>
-                </td>
-            </tr>
-    </table>
-    <br/>
-
+   * - Parameter
+     - Type
+     - Choices / default
+     - Comments
+   * - ``config``
+     - list / elements=dict
+     -
+     - A list with one entry holding the static routes of the default VRF.
+   * - – ``routes``
+     - list / elements=dict
+     -
+     - A list of static routes.
+   * - – – ``dest``
+     - str / **required**
+     -
+     - Destination of the route in ``network/prefix-length`` format, for example ``172.31.1.0/24``.
+   * - – – ``next_hops``
+     - list / elements=dict
+     -
+     - Next hops of the route. With ``state=deleted``, leave this out to remove every next hop of the destination.
+   * - – – – ``admin_distance``
+     - int
+     -
+     - Metric of the route. The switch default is 1.
+   * - – – – ``description``
+     - str
+     -
+     - Name of the route. Only for a route with ``config[].routes[].next_hops[].forward_router_address``.
+   * - – – – ``forward_router_address``
+     - str
+     -
+     - IPv4 address of the gateway. Give either this or ``config[].routes[].next_hops[].interface``.
+   * - – – – ``interface``
+     - str
+     -
+     - Name of the IP interface the route points to.
+   * - – – – ``tag``
+     - int
+     -
+     - Tag of the route. Only for a route with ``config[].routes[].next_hops[].forward_router_address``.
+   * - ``running_config``
+     - str
+     -
+     - Text to convert into structured data. Only used with ``state=parsed``. Give the output of ``show configuration snapshot ip-routing`` from the switch.
+   * - ``state``
+     - str
+     - ``merged`` (default), ``replaced``, ``overridden``, ``deleted``, ``gathered``, ``rendered``, ``parsed``
+     - What the module does with the given configuration. ``merged`` adds the given configuration to the switch and changes only the attributes that are given. ``replaced`` makes each given entry match the task exactly. Attributes that are left out go back to their default value. ``overridden`` makes the whole resource match the task. Entries found on the switch that are not in the task are removed. ``deleted`` removes the given entries. Without ``config``, every entry of this resource is removed. ``gathered`` reads the configuration from the switch and returns it as ``gathered``. Nothing is changed. ``rendered`` returns the commands for the given configuration as ``rendered``, without connecting to the switch. ``parsed`` converts the text given in ``running_config`` into structured data, returned as ``parsed``, without connecting to the switch.
 
 Notes
 -----
 
-.. note::
-   - Tested against Arista EOS 4.24.6F
-   - This module works with connection ``network_cli``. See the `EOS Platform Options <../network/user_guide/platform_eos.html>`_.
-
-
+- Tested against Alcatel-Lucent Enterprise OmniSwitch AOS 8.11.162.R01.
+- This module works with connection ``ansible.netcommon.network_cli``.
+- After a change, the configuration is saved to flash with ``write memory flash-synchro``, unless ``ansible_aos_write_memory_flash`` is set to ``false``. Saving needs ``ansible_command_timeout`` to be 60 seconds or more.
 
 Examples
 --------
 
 .. code-block:: yaml
 
+    - name: Create static routes
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.254
+              - dest: 172.31.2.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.254
+                    admin_distance: 5
+                    tag: 7
+                    description: Backup
+              - dest: 172.31.3.0/24
+                next_hops:
+                  - interface: int_10
+        state: merged
 
-    # Using deleted----------------------------------------------------------------------------------------
+    # Commands sent to the switch
+    # ---------------------------
+    # ip static-route 172.31.1.0/24 gateway 10.10.10.254
+    # ip static-route 172.31.2.0/24 gateway 10.10.10.254 tag 7 name "Backup" metric 5
+    # ip static-route 172.31.3.0/24 interface "int_10"
 
-    - name: Configure a static route on Alcatel-Lucent Enterprise device
-      gather_facts: false
-      connection: network_cli
-      hosts: all
-      tasks:
-          - name: Show current static routes
-            ansible.netcommon.cli_command:
-                command: show configuration snapshot ip-routing
-            register: current_config
+    - name: Replace the next hop of a destination
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.253
+        state: replaced
 
-          - debug:
-                msg: "Current static routes: {{ current_config.stdout }}"
+    # Commands sent to the switch
+    # ---------------------------
+    # no ip static-route 172.31.1.0/24 gateway 10.10.10.254
+    # ip static-route 172.31.1.0/24 gateway 10.10.10.253
 
-          - name: Configure a static route
-            ale.aos8.aos8_static_routes:
-                config:
-                - routes:
-                    - dest: "2.2.2.0/24"
-                      next_hops:
-                      - forward_router_address: "10.1.1.1"
-                        description: "My route"
-                        admin_distance: 1
-                state: delete
-            register: result
+    - name: Read the static routes from the switch
+      ale.aos8.aos8_static_routes:
+        state: gathered
 
-          - debug:
-                msg: "Commands generated: {{ result.commands }}"
+    - name: Keep only this route (every other static route is removed)
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.253
+        state: overridden
 
-          - name: Show static routes after change
-            ansible.netcommon.cli_command:
-                command: show configuration snapshot ip-routing
-            register: new_config
+    # Commands sent to the switch (other entries found on the switch are removed in the same way)
+    # -------------------------------------------------------------------------------------------
+    # no ip static-route 172.31.2.0/24 gateway 10.10.10.254
+    # no ip static-route 172.31.3.0/24 interface "int_10"
 
-          - debug:
-                msg: "New static routes: {{ new_config.stdout }}"
+    - name: Show the commands for a route without connecting to the switch
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 10.99.0.0/16
+                next_hops:
+                  - forward_router_address: 10.10.10.254
+                    admin_distance: 10
+        state: rendered
 
+    # Value returned as rendered
+    # --------------------------
+    # - ip static-route 10.99.0.0/16 gateway 10.10.10.254 metric 10
 
-    # Using merged--------------------------------------------------------------------------------------------
+    - name: Convert configuration lines into structured data
+      ale.aos8.aos8_static_routes:
+        running_config: |
+          ip static-route 172.31.251.0/24 interface int_20 metric 1
+          ip static-route 172.31.253.0/24 gateway 10.10.10.2 metric 1 tag 7 name "valroute"
+        state: parsed
 
-    - name: Configure a static route on Alcatel-Lucent Enterprise device
-      gather_facts: false
-      connection: network_cli
-      hosts: all
-      tasks:
-          - name: Show current static routes
-            ansible.netcommon.cli_command:
-                command: show configuration snapshot ip-routing
-            register: current_config
+    # Value returned as parsed
+    # ------------------------
+    # - routes:
+    #     - dest: 172.31.251.0/24
+    #       next_hops:
+    #         - interface: int_20
+    #           admin_distance: 1
+    #     - dest: 172.31.253.0/24
+    #       next_hops:
+    #         - forward_router_address: 10.10.10.2
+    #           admin_distance: 1
+    #           tag: 7
+    #           description: valroute
 
-          - debug:
-                msg: "Current static routes: {{ current_config.stdout }}"
+    - name: Remove every next hop of a destination
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+        state: deleted
 
-          - name: Configure a static route
-            ale.aos8.aos8_static_routes:
-                config:
-                - routes:
-                    - dest: "2.2.2.0/24"
-                      next_hops:
-                      - forward_router_address: "10.1.1.1"
-                        description: "My route"
-                        admin_distance: 1
-                state: merged
-            register: result
+    # Commands sent to the switch
+    # ---------------------------
+    # no ip static-route 172.31.1.0/24 gateway 10.10.10.253
 
-          - debug:
-                msg: "Commands generated: {{ result.commands }}"
+    - name: Remove every static route
+      ale.aos8.aos8_static_routes:
+        state: deleted
 
-          - name: Show static routes after change
-            ansible.netcommon.cli_command:
-                command: show configuration snapshot ip-routing
-            register: new_config
+    # Commands sent to the switch (other entries found on the switch are removed in the same way)
+    # -------------------------------------------------------------------------------------------
+    # no ip static-route 172.31.2.0/24 gateway 10.10.10.254
 
-          - debug:
-                msg: "New static routes: {{ new_config.stdout }}"
-
- 
-Return Values
+Return values
 -------------
-Common return values are documented `here <https://docs.ansible.com/ansible/latest/reference_appendices/common_return_values.html#common-return-values>`_, the following are the fields unique to this module:
 
-.. raw:: html
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 20 44
 
-    <table border=0 cellpadding=0 class="documentation-table">
-        <tr>
-            <th colspan="1">Key</th>
-            <th>Returned</th>
-            <th width="100%">Description</th>
-        </tr>
-            <tr>
-                <td colspan="1">
-                    <div class="ansibleOptionAnchor" id="return-"></div>
-                    <b>after</b>
-                    <a class="ansibleOptionLink" href="#return-" title="Permalink to this return value"></a>
-                    <div style="font-size: small">
-                      <span style="color: purple">list</span>
-                    </div>
-                </td>
-                <td>when changed</td>
-                <td>
-                            <div>The resulting configuration model invocation.</div>
-                    <br/>
-                        <div style="font-size: smaller"><b>Sample:</b></div>
-                        <div style="font-size: smaller; color: blue; word-wrap: break-word; word-break: break-all;">The configuration returned will always be in the same format
-     of the parameters above.</div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="1">
-                    <div class="ansibleOptionAnchor" id="return-"></div>
-                    <b>before</b>
-                    <a class="ansibleOptionLink" href="#return-" title="Permalink to this return value"></a>
-                    <div style="font-size: small">
-                      <span style="color: purple">list</span>
-                    </div>
-                </td>
-                <td>always</td>
-                <td>
-                            <div>The configuration prior to the model invocation.</div>
-                    <br/>
-                        <div style="font-size: smaller"><b>Sample:</b></div>
-                        <div style="font-size: smaller; color: blue; word-wrap: break-word; word-break: break-all;">The configuration returned will always be in the same format
-     of the parameters above.</div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="1">
-                    <div class="ansibleOptionAnchor" id="return-"></div>
-                    <b>commands</b>
-                    <a class="ansibleOptionLink" href="#return-" title="Permalink to this return value"></a>
-                    <div style="font-size: small">
-                      <span style="color: purple">list</span>
-                    </div>
-                </td>
-                <td>always</td>
-                <td>
-                            <div>The set of commands pushed to the remote device.</div>
-                    <br/>
-                        <div style="font-size: smaller"><b>Sample:</b></div>
-                        <div style="font-size: smaller; color: blue; word-wrap: break-word; word-break: break-all;">[&#x27;ip route vrf vrf1 192.2.2.0/24 125.2.3.1 93&#x27;, &#x27;ipv6 route 5001::/64 Ethernet1&#x27;]</div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="1">
-                    <div class="ansibleOptionAnchor" id="return-"></div>
-                    <b>gathered</b>
-                    <a class="ansibleOptionLink" href="#return-" title="Permalink to this return value"></a>
-                    <div style="font-size: small">
-                      <span style="color: purple">list</span>
-                    </div>
-                </td>
-                <td>When <code>state</code> is <em>gathered</em></td>
-                <td>
-                            <div>The configuration as structured data transformed for the running configuration fetched from remote host</div>
-                    <br/>
-                        <div style="font-size: smaller"><b>Sample:</b></div>
-                        <div style="font-size: smaller; color: blue; word-wrap: break-word; word-break: break-all;">The configuration returned will always be in the same format of the parameters above.</div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="1">
-                    <div class="ansibleOptionAnchor" id="return-"></div>
-                    <b>parsed</b>
-                    <a class="ansibleOptionLink" href="#return-" title="Permalink to this return value"></a>
-                    <div style="font-size: small">
-                      <span style="color: purple">list</span>
-                    </div>
-                </td>
-                <td>When <code>state</code> is <em>parsed</em></td>
-                <td>
-                            <div>The configuration as structured data transformed for the value of <code>running_config</code> option</div>
-                    <br/>
-                        <div style="font-size: smaller"><b>Sample:</b></div>
-                        <div style="font-size: smaller; color: blue; word-wrap: break-word; word-break: break-all;">The configuration returned will always be in the same format of the parameters above.</div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="1">
-                    <div class="ansibleOptionAnchor" id="return-"></div>
-                    <b>rendered</b>
-                    <a class="ansibleOptionLink" href="#return-" title="Permalink to this return value"></a>
-                    <div style="font-size: small">
-                      <span style="color: purple">list</span>
-                    </div>
-                </td>
-                <td>When <code>state</code> is <em>rendered</em></td>
-                <td>
-                            <div>The set of CLI commands generated from the value in <code>config</code> option</div>
-                    <br/>
-                        <div style="font-size: smaller"><b>Sample:</b></div>
-                        <div style="font-size: smaller; color: blue; word-wrap: break-word; word-break: break-all;">- ip route 165.10.1.0/24 Ethernet1 10.1.1.2 100 - ipv6 route 5001::/64 Ethernet1</div>
-                </td>
-            </tr>
-    </table>
-    <br/><br/>
+   * - Key
+     - Type
+     - Returned
+     - Description
+   * - ``after``
+     - list
+     - when the module changed the switch
+     - The configuration found on the switch after the module ran.
+   * - ``before``
+     - list
+     - when ``state`` is ``merged`` or ``replaced`` or ``overridden`` or ``deleted``
+     - The configuration found on the switch before the module ran.
+   * - ``commands``
+     - list
+     - when ``state`` is ``merged`` or ``replaced`` or ``overridden`` or ``deleted``
+     - The commands sent to the switch. In check mode, the commands that would be sent. Sample: ``["ip static-route 172.31.1.0/24 gateway 10.10.10.254", "ip static-route 172.31.2.0/24 gateway 10.10.10.254 tag 7 name \"Backup\" metric 5", "ip static-route 172.31.3.0/24 interface \"int_10\""]``
+   * - ``gathered``
+     - list
+     - when ``state`` is ``gathered``
+     - The configuration read from the switch.
+   * - ``parsed``
+     - list
+     - when ``state`` is ``parsed``
+     - The structured data built from ``running_config``. Sample: ``[{"routes": [{"dest": "172.31.251.0/24", "next_hops": [{"admin_distance": 1, "interface": "int_20"}]}, {"dest": "172.31.253.0/24", "next_hops": [{"admin_distance": 1, "description": "valroute", "forward_router_address": "10.10.10.2", "tag": 7}]}]}]``
+   * - ``rendered``
+     - list
+     - when ``state`` is ``rendered``
+     - The commands for the given configuration. Sample: ``["ip static-route 10.99.0.0/16 gateway 10.10.10.254 metric 10"]``
 
+Authors
+-------
 
-Status
-------
-
+- Maxime Descloux (@MaximeALE)
+- Mathias Guillemot (@mathias-gt)

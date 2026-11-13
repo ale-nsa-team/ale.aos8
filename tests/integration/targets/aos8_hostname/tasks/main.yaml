@@ -1,0 +1,125 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Set the system name
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: core-sw-1
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['system name "core-sw-1"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Set the system name (run again: nothing changes)'
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: core-sw-1
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Read the system name from the switch
+      ale.aos8.aos8_hostname:
+        state: gathered
+      register: result
+    - name: Check the gathered data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.gathered == {''hostname'': ''core-sw-1''}'
+        fail_msg: '{{ result | to_json }}'
+    - name: Replace the system name
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: edge-sw-1
+        state: replaced
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['system name "edge-sw-1"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Replace the system name (run again: nothing changes)'
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: edge-sw-1
+        state: replaced
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Override the system name
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: val-os1
+        state: overridden
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['system name "val-os1"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Override the system name (run again: nothing changes)'
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: val-os1
+        state: overridden
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Show the command for a system name without connecting to the switch
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: core-sw-1
+        state: rendered
+      register: result
+    - name: Check the rendered commands
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.rendered == ['system name "core-sw-1"']
+        fail_msg: '{{ result | to_json }}'
+    - name: Convert a configuration line into structured data
+      ale.aos8.aos8_hostname:
+        running_config: system name "core-sw-1"
+        state: parsed
+      register: result
+    - name: Check the parsed data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.parsed == {''hostname'': ''core-sw-1''}'
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+        - system name "val-os1"
+      changed_when: false
+      failed_when: false

@@ -1,0 +1,76 @@
+---
+name: Collection Tests
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+env:
+  COLLECTION_PATH: ansible_collections/ale/aos8
+
+jobs:
+  build-import:
+    name: Build and install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ansible-core
+      - run: ansible-galaxy collection build
+      - run: ansible-galaxy collection install ale-aos8-*.tar.gz
+      - run: ansible-doc -l ale.aos8
+
+  sanity:
+    name: Sanity (ansible-core ${{ matrix.ansible }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ansible: ["stable-2.18", "stable-2.19", "stable-2.20"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ${{ env.COLLECTION_PATH }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz
+      # the modules import ansible.netcommon: install it next to the collection
+      - run: ansible-galaxy collection install ansible.netcommon -p .
+      - run: ansible-test sanity --docker default -v --color
+        working-directory: ${{ env.COLLECTION_PATH }}
+
+  unit:
+    name: Unit (ansible-core ${{ matrix.ansible }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ansible: ["stable-2.18", "stable-2.19", "stable-2.20"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ${{ env.COLLECTION_PATH }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz
+      - run: ansible-galaxy collection install ansible.netcommon -p .
+      - run: ansible-test units --docker default -v --color
+        working-directory: ${{ env.COLLECTION_PATH }}
+
+  ansible-lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ansible/ansible-lint@v25

@@ -1,0 +1,13 @@
+# For ansible-tox-linters
+black
+flake8
+yamllint
+
+# Unit test runner
+cffi
+mock
+pexpect
+pytest-xdist
+rstcheck<4,>=3
+pytest-ansible
+pytest-cov

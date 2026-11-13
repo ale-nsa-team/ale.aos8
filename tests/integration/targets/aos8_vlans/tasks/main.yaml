@@ -1,0 +1,229 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+    - no vlan 30
+    - no vlan 31
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Create two VLANs
+      ale.aos8.aos8_vlans:
+        config:
+          - vlan_id: 30
+            name: Voice
+            admin: enable
+            mtu: 9000
+          - vlan_id: 31
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 30 admin-state enable', 'vlan 30 name "Voice"', 'vlan 30 mtu-ip 9000', 'vlan 31 admin-state enable']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Create two VLANs (run again: nothing changes)'
+      ale.aos8.aos8_vlans:
+        config:
+          - vlan_id: 30
+            name: Voice
+            admin: enable
+            mtu: 9000
+          - vlan_id: 31
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Rename a VLAN and disable it
+      ale.aos8.aos8_vlans:
+        config:
+          - vlan_id: 31
+            name: Guest
+            admin: disable
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 31 admin-state disable', 'vlan 31 name "Guest"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Rename a VLAN and disable it (run again: nothing changes)'
+      ale.aos8.aos8_vlans:
+        config:
+          - vlan_id: 31
+            name: Guest
+            admin: disable
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Replace the configuration of VLAN 30 (the MTU goes back to 1500)
+      ale.aos8.aos8_vlans:
+        config:
+          - vlan_id: 30
+            name: Voice
+        state: replaced
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 30 mtu-ip 1500']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Replace the configuration of VLAN 30 (the MTU goes back to 1500) (run again: nothing changes)'
+      ale.aos8.aos8_vlans:
+        config:
+          - vlan_id: 30
+            name: Voice
+        state: replaced
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Read the VLANs from the switch
+      ale.aos8.aos8_vlans:
+        state: gathered
+      register: result
+    - name: Check the gathered data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.gathered | selectattr('vlan_id', 'equalto', 30) | map(attribute='name') | first == 'Voice'
+          - result.gathered | selectattr('vlan_id', 'equalto', 31) | map(attribute='admin') | first == 'disable'
+          - result.gathered | selectattr('vlan_id', 'equalto', 1) | map(attribute='operational_state') | first in ['enable', 'disable']
+        fail_msg: '{{ result | to_json }}'
+    - name: Keep only VLAN 10 and VLAN 30 (every other VLAN except VLAN 1 is removed)
+      ale.aos8.aos8_vlans:
+        config:
+          - vlan_id: 10
+            name: VAL-ISL
+          - vlan_id: 30
+            name: Voice
+        state: overridden
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - '''no vlan 31'' in result.commands'
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Keep only VLAN 10 and VLAN 30 (every other VLAN except VLAN 1 is removed) (run again: nothing changes)'
+      ale.aos8.aos8_vlans:
+        config:
+          - vlan_id: 10
+            name: VAL-ISL
+          - vlan_id: 30
+            name: Voice
+        state: overridden
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Show the commands for a VLAN without connecting to the switch
+      ale.aos8.aos8_vlans:
+        config:
+          - vlan_id: 998
+            name: Vlan 998
+            admin: disable
+        state: rendered
+      register: result
+    - name: Check the rendered commands
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.rendered == ['vlan 998 admin-state disable', 'vlan 998 name "Vlan 998"']
+        fail_msg: '{{ result | to_json }}'
+    - name: Convert the output of show vlan into structured data
+      ale.aos8.aos8_vlans:
+        running_config: |
+          vlan    type   admin   oper    ip    mtu          name
+          ------+-------+-------+------+------+------+------------------
+          1      std       Ena     Ena   Dis    1500    VLAN 1
+          20     std       Ena     Dis   Dis    1280    Users
+        state: parsed
+      register: result
+    - name: Check the parsed data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.parsed == [{''vlan_id'': 1, ''name'': ''VLAN 1'', ''admin'': ''enable'', ''mtu'': 1500, ''operational_state'': ''enable''}, {''vlan_id'': 20, ''name'': ''Users'', ''admin'': ''enable'',
+            ''mtu'': 1280, ''operational_state'': ''disable''}]'
+        fail_msg: '{{ result | to_json }}'
+    - name: Remove VLAN 30
+      ale.aos8.aos8_vlans:
+        config:
+          - vlan_id: 30
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no vlan 30']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove VLAN 30 (run again: nothing changes)'
+      ale.aos8.aos8_vlans:
+        config:
+          - vlan_id: 30
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Remove every VLAN except VLAN 1
+      ale.aos8.aos8_vlans:
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - '''no vlan 10'' in result.commands'
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove every VLAN except VLAN 1 (run again: nothing changes)'
+      ale.aos8.aos8_vlans:
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+        - no vlan 30
+        - no vlan 31
+        - vlan 10 admin-state enable
+        - vlan 10 name "VAL-ISL"
+        - vlan 10 members port 1/1/1 tagged
+        - ip interface "int_10" address 10.10.10.1 mask 255.255.255.0 vlan 10
+      changed_when: false
+      failed_when: false

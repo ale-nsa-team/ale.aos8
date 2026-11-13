@@ -1,0 +1,2 @@
+snmp station 192.168.121.250 162 "valtest" v2 enable
+snmp station 192.168.121.249 162 "valtest" v1 disable

@@ -1,0 +1,19 @@
+---
+# containerlab topology for the ale.aos8 lab tests: one virtual OmniSwitch.
+# Adapt the management network and address to your lab.
+name: aos8-lab
+
+mgmt:
+  network: clab-mgmt
+  bridge: clab-mgmt-br
+  ipv4-subnet: 192.168.121.0/24
+  ipv4-gw: 192.168.121.190
+
+topology:
+  nodes:
+    val-os1:
+      kind: ale_vaos
+      image: vrnetlab/ale_vaos:8.11.162.R01
+      env: { CLAB_MGMT_PASSTHROUGH: "true" }
+      mgmt-ipv4: 192.168.121.181
+      startup-config: configs/val-os1.cfg

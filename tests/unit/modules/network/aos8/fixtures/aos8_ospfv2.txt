@@ -1,0 +1,7 @@
+! OSPF:
+ip load ospf
+ip ospf area 0.0.0.0
+ip ospf interface "int_10"
+ip ospf interface "int_10" area 0.0.0.0
+ip ospf interface "int_10" admin-state enable 
+ip ospf admin-state enable

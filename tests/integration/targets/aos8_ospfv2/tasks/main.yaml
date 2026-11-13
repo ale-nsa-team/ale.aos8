@@ -1,0 +1,218 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+    - ip ospf admin-state disable
+    - no ip ospf interface "int_10"
+    - no ip ospf area 0.0.0.0
+    - no ip ospf area 0.0.0.1
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Enable OSPF and put an interface in the backbone area
+      ale.aos8.aos8_ospfv2:
+        config:
+          admin_state: enable
+          areas:
+            - area_id: 0.0.0.0
+              interfaces:
+                - interface: int_10
+                  admin_state: enable
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - '''ip ospf area 0.0.0.0'' in result.commands'
+          - '''ip ospf interface "int_10"'' in result.commands'
+          - '''ip ospf interface "int_10" area 0.0.0.0'' in result.commands'
+          - '''ip ospf interface "int_10" admin-state enable'' in result.commands'
+          - '''ip ospf admin-state enable'' in result.commands'
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Enable OSPF and put an interface in the backbone area (run again: nothing changes)'
+      ale.aos8.aos8_ospfv2:
+        config:
+          admin_state: enable
+          areas:
+            - area_id: 0.0.0.0
+              interfaces:
+                - interface: int_10
+                  admin_state: enable
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Disable OSPF on an interface
+      ale.aos8.aos8_ospfv2:
+        config:
+          areas:
+            - area_id: 0.0.0.0
+              interfaces:
+                - interface: int_10
+                  admin_state: disable
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['ip ospf interface "int_10" admin-state disable']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Disable OSPF on an interface (run again: nothing changes)'
+      ale.aos8.aos8_ospfv2:
+        config:
+          areas:
+            - area_id: 0.0.0.0
+              interfaces:
+                - interface: int_10
+                  admin_state: disable
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Move the interface to area 0.0.0.1 and remove area 0.0.0.0
+      ale.aos8.aos8_ospfv2:
+        config:
+          admin_state: enable
+          areas:
+            - area_id: 0.0.0.1
+              interfaces:
+                - interface: int_10
+                  admin_state: enable
+        state: replaced
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['ip ospf area 0.0.0.1', 'ip ospf interface "int_10" area 0.0.0.1', 'ip ospf interface "int_10" admin-state enable', 'no ip ospf area 0.0.0.0']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Move the interface to area 0.0.0.1 and remove area 0.0.0.0 (run again: nothing changes)'
+      ale.aos8.aos8_ospfv2:
+        config:
+          admin_state: enable
+          areas:
+            - area_id: 0.0.0.1
+              interfaces:
+                - interface: int_10
+                  admin_state: enable
+        state: replaced
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Read the OSPF configuration from the switch
+      ale.aos8.aos8_ospfv2:
+        state: gathered
+      register: result
+    - name: Check the gathered data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.gathered == {''admin_state'': ''enable'', ''areas'': [{''area_id'': ''0.0.0.1'', ''interfaces'': [{''interface'': ''int_10'', ''admin_state'': ''enable''}]}]}'
+        fail_msg: '{{ result | to_json }}'
+    - name: Disable OSPF and keep only area 0.0.0.1, without interfaces
+      ale.aos8.aos8_ospfv2:
+        config:
+          admin_state: disable
+          areas:
+            - area_id: 0.0.0.1
+        state: overridden
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['ip ospf admin-state disable', 'no ip ospf interface "int_10"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Disable OSPF and keep only area 0.0.0.1, without interfaces (run again: nothing changes)'
+      ale.aos8.aos8_ospfv2:
+        config:
+          admin_state: disable
+          areas:
+            - area_id: 0.0.0.1
+        state: overridden
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Show the commands for an OSPF configuration without connecting to the switch
+      ale.aos8.aos8_ospfv2:
+        config:
+          admin_state: enable
+          areas:
+            - area_id: 0.0.0.0
+              interfaces:
+                - interface: int_10
+        state: rendered
+      register: result
+    - name: Check the rendered commands
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.rendered == ['ip load ospf', 'ip ospf area 0.0.0.0', 'ip ospf interface "int_10"', 'ip ospf interface "int_10" area 0.0.0.0', 'ip ospf admin-state enable']
+        fail_msg: '{{ result | to_json }}'
+    - name: Convert configuration lines into structured data
+      ale.aos8.aos8_ospfv2:
+        running_config: |
+          ip load ospf
+          ip ospf area 0.0.0.0
+          ip ospf interface "int_10"
+          ip ospf interface "int_10" area 0.0.0.0
+          ip ospf interface "int_10" admin-state enable
+          ip ospf admin-state enable
+        state: parsed
+      register: result
+    - name: Check the parsed data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.parsed == {''admin_state'': ''enable'', ''areas'': [{''area_id'': ''0.0.0.0'', ''interfaces'': [{''interface'': ''int_10'', ''admin_state'': ''enable''}]}]}'
+        fail_msg: '{{ result | to_json }}'
+    - name: Disable OSPF and remove every area and interface
+      ale.aos8.aos8_ospfv2:
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no ip ospf area 0.0.0.1']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Disable OSPF and remove every area and interface (run again: nothing changes)'
+      ale.aos8.aos8_ospfv2:
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+      changed_when: false
+      failed_when: false

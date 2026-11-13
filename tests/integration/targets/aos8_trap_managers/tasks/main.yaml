@@ -1,0 +1,256 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+    - no snmp station 192.168.121.250
+    - no snmp station 192.168.121.249
+    - no snmp station 192.168.121.248
+  changed_when: false
+  failed_when: false
+- name: Create what the tests need
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - user snmpuser password Snmpuser@123 read-only all no auth
+    - system security crypto-strong-security disable
+    - user snmpv3user password Snmpv3user@123 read-only all sha+aes priv-password Snmpv3priv@123
+    - system security crypto-strong-security enable
+  changed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Add SNMP trap stations
+      ale.aos8.aos8_trap_managers:
+        config:
+          - host: 192.168.121.250
+            string: snmpuser
+            version: v2
+            state: enable
+          - host: 192.168.121.249
+            port: 1162
+            string: snmpuser
+            version: v1
+            state: disable
+          - host: 192.168.121.248
+            string: snmpv3user
+            version: v3
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['snmp station 192.168.121.250 162 "snmpuser" v2 enable', 'snmp station 192.168.121.249 1162 "snmpuser" v1 disable', 'snmp station 192.168.121.248 162 "snmpv3user" v3 enable']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Add SNMP trap stations (run again: nothing changes)'
+      ale.aos8.aos8_trap_managers:
+        config:
+          - host: 192.168.121.250
+            string: snmpuser
+            version: v2
+            state: enable
+          - host: 192.168.121.249
+            port: 1162
+            string: snmpuser
+            version: v1
+            state: disable
+          - host: 192.168.121.248
+            string: snmpv3user
+            version: v3
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Enable a station
+      ale.aos8.aos8_trap_managers:
+        config:
+          - host: 192.168.121.249
+            port: 1162
+            string: snmpuser
+            version: v1
+            state: enable
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['snmp station 192.168.121.249 1162 "snmpuser" v1 enable']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Enable a station (run again: nothing changes)'
+      ale.aos8.aos8_trap_managers:
+        config:
+          - host: 192.168.121.249
+            port: 1162
+            string: snmpuser
+            version: v1
+            state: enable
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Replace a station (port and version go back to their defaults)
+      ale.aos8.aos8_trap_managers:
+        config:
+          - host: 192.168.121.249
+            string: snmpuser
+        state: replaced
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['snmp station 192.168.121.249 162 "snmpuser" v2 enable']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Replace a station (port and version go back to their defaults) (run again: nothing changes)'
+      ale.aos8.aos8_trap_managers:
+        config:
+          - host: 192.168.121.249
+            string: snmpuser
+        state: replaced
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Read the SNMP trap stations from the switch
+      ale.aos8.aos8_trap_managers:
+        state: gathered
+      register: result
+    - name: Check the gathered data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - '{''host'': ''192.168.121.250'', ''port'': 162, ''string'': ''snmpuser'', ''version'': ''v2'', ''state'': ''enable''} in result.gathered'
+          - '{''host'': ''192.168.121.248'', ''port'': 162, ''string'': ''snmpv3user'', ''version'': ''v3'', ''state'': ''enable''} in result.gathered'
+        fail_msg: '{{ result | to_json }}'
+    - name: Keep only one station (every other station is removed)
+      ale.aos8.aos8_trap_managers:
+        config:
+          - host: 192.168.121.250
+            string: snmpuser
+        state: overridden
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - '''no snmp station 192.168.121.249'' in result.commands'
+          - '''no snmp station 192.168.121.248'' in result.commands'
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Keep only one station (every other station is removed) (run again: nothing changes)'
+      ale.aos8.aos8_trap_managers:
+        config:
+          - host: 192.168.121.250
+            string: snmpuser
+        state: overridden
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Show the commands for a station without connecting to the switch
+      ale.aos8.aos8_trap_managers:
+        config:
+          - host: 10.0.0.9
+            port: 1162
+            string: ops
+            version: v3
+        state: rendered
+      register: result
+    - name: Check the rendered commands
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.rendered == ['snmp station 10.0.0.9 1162 "ops" v3 enable']
+        fail_msg: '{{ result | to_json }}'
+    - name: Convert configuration lines into structured data
+      ale.aos8.aos8_trap_managers:
+        running_config: |
+          snmp station 192.168.121.250 162 "valtest" v2 enable
+          snmp station 192.168.121.249 162 "valtest" v1 disable
+        state: parsed
+      register: result
+    - name: Check the parsed data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.parsed == [{''host'': ''192.168.121.250'', ''port'': 162, ''string'': ''valtest'', ''version'': ''v2'', ''state'': ''enable''}, {''host'': ''192.168.121.249'', ''port'': 162, ''string'':
+            ''valtest'', ''version'': ''v1'', ''state'': ''disable''}]'
+        fail_msg: '{{ result | to_json }}'
+    - name: Remove a station
+      ale.aos8.aos8_trap_managers:
+        config:
+          - host: 192.168.121.250
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no snmp station 192.168.121.250']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove a station (run again: nothing changes)'
+      ale.aos8.aos8_trap_managers:
+        config:
+          - host: 192.168.121.250
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Prepare: Remove every station'
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - snmp station 192.168.121.249 162 "snmpuser" v2 enable
+      changed_when: false
+      failed_when: false
+    - name: Remove every station
+      ale.aos8.aos8_trap_managers:
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no snmp station 192.168.121.249']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove every station (run again: nothing changes)'
+      ale.aos8.aos8_trap_managers:
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+        - no user snmpuser
+        - no user snmpv3user
+        - system security crypto-strong-security enable
+      changed_when: false
+      failed_when: false

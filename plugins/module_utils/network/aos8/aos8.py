@@ -40,37 +40,28 @@ _DEVICE_CONFIGS = {}
 
 
 def get_connection(module):
-    if hasattr(module, "_ios_connection"):
-        return module._ios_connection
+    if hasattr(module, "_aos8_connection"):
+        return module._aos8_connection
 
     capabilities = get_capabilities(module)
     network_api = capabilities.get("network_api")
     if network_api == "cliconf":
-        module._ios_connection = Connection(module._socket_path)
+        module._aos8_connection = Connection(module._socket_path)
     else:
         module.fail_json(msg="Invalid connection type %s" % network_api)
 
-    return module._ios_connection
+    return module._aos8_connection
 
 
 def get_capabilities(module):
-    if hasattr(module, "_ios_capabilities"):
-        return module._ios_capabilities
+    if hasattr(module, "_aos8_capabilities"):
+        return module._aos8_capabilities
     try:
         capabilities = Connection(module._socket_path).get_capabilities()
     except ConnectionError as exc:
         module.fail_json(msg=to_text(exc, errors="surrogate_then_replace"))
-    module._ios_capabilities = json.loads(capabilities)
-    return module._ios_capabilities
-
-
-def get_defaults_flag(module):
-    connection = get_connection(module)
-    try:
-        out = connection.get_defaults_flag()
-    except ConnectionError as exc:
-        module.fail_json(msg=to_text(exc, errors="surrogate_then_replace"))
-    return to_text(out, errors="surrogate_then_replace").strip()
+    module._aos8_capabilities = json.loads(capabilities)
+    return module._aos8_capabilities
 
 
 def get_config(module, flags=None):
@@ -90,7 +81,6 @@ def get_config(module, flags=None):
             out = connection.get_config(flags=flags)
         except ConnectionError as exc:
             if section_filter:
-                # Some ios devices don't understand `| section foo`
                 out = get_config(module, flags=flags[:-1])
             else:
                 module.fail_json(msg=to_text(exc, errors="surrogate_then_replace"))
@@ -115,60 +105,3 @@ def load_config(module, commands):
         return resp.get("response")
     except ConnectionError as exc:
         module.fail_json(msg=to_text(exc))
-
-
-def normalize_interface(name):
-    """Return the normalized interface name"""
-    if not name:
-        return
-
-    def _get_number(name):
-        digits = ""
-        for char in name:
-            if char.isdigit() or char in "/.":
-                digits += char
-        return digits
-
-    if name.lower().startswith("gi"):
-        if_type = "GigabitEthernet"
-    elif name.lower().startswith("twe"):
-        if_type = "TwentyFiveGigE"
-    elif name.lower().startswith("tw"):
-        if_type = "TwoGigabitEthernet"
-    elif name.lower().startswith("te"):
-        if_type = "TenGigabitEthernet"
-    elif name.lower().startswith("fa"):
-        if_type = "FastEthernet"
-    elif name.lower().startswith("fo"):
-        if_type = "FortyGigabitEthernet"
-    elif name.lower().startswith("fi"):
-        if_type = "FiveGigabitEthernet"
-    elif name.lower().startswith("et"):
-        if_type = "Ethernet"
-    elif name.lower().startswith("vl"):
-        if_type = "Vlan"
-    elif name.lower().startswith("lo"):
-        if_type = "loopback"
-    elif name.lower().startswith("po"):
-        if_type = "port-channel"
-    elif name.lower().startswith("nv"):
-        if_type = "nve"
-    elif name.lower().startswith("hu"):
-        if_type = "HundredGigE"
-    elif name.lower().startswith("se"):
-        if_type = "Serial"
-    else:
-        if_type = None
-
-    number_list = name.split(" ")
-    if len(number_list) == 2:
-        if_number = number_list[-1].strip()
-    else:
-        if_number = _get_number(name)
-
-    if if_type:
-        proper_interface = if_type + if_number
-    else:
-        proper_interface = name
-
-    return proper_interface

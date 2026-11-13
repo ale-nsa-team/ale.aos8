@@ -1,0 +1,101 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+    - no vlan 40
+    - no vlan prompt-on-deletion
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Run a show command
+      ale.aos8.aos8_command:
+        commands: show system
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - '''Description'' in result.stdout[0]'
+          - result.stdout_lines[0] | length > 3
+        fail_msg: '{{ result | to_json }}'
+    - name: Run several commands
+      ale.aos8.aos8_command:
+        commands:
+          - show vlan
+          - show ip interface
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.stdout | length == 2
+          - '''VAL-ISL'' in result.stdout[0]'
+          - '''int_10'' in result.stdout[1]'
+        fail_msg: '{{ result | to_json }}'
+    - name: Run a command that changes the switch
+      ale.aos8.aos8_command:
+        commands:
+          - interfaces port 1/1/20 admin-state disable
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.stdout | length == 1
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Prepare: Answer a confirmation question'
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vlan 40 admin-state enable
+        - vlan 40 members port 1/1/21 tagged
+        - vlan prompt-on-deletion
+      changed_when: false
+      failed_when: false
+    - name: Answer a confirmation question
+      ale.aos8.aos8_command:
+        commands:
+          - command: no vlan 40
+            prompt: '[Yy]/[Nn]'
+            answer: y
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.stdout | length == 1
+        fail_msg: '{{ result | to_json }}'
+    - name: Check that VLAN 40 is gone
+      ale.aos8.aos8_command:
+        commands: show vlan
+      register: result
+    - name: Check the VLAN list
+      ansible.builtin.assert:
+        that:
+          - result.stdout[0] | regex_findall('(?m)^40\s') | length == 0
+    - name: In check mode only show commands are sent
+      ale.aos8.aos8_command:
+        commands:
+          - show vlan
+          - vlan 41 admin-state enable
+      check_mode: true
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.stdout | length == 1
+          - result.warnings | length == 1
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+        - no vlan prompt-on-deletion
+        - no vlan 40
+        - interfaces port 1/1/20 admin-state enable
+      changed_when: false
+      failed_when: false

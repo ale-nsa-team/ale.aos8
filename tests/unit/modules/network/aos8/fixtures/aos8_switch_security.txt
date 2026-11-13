@@ -1,0 +1,5 @@
+aaa authentication default "local" 
+aaa authentication console "local" 
+aaa authentication telnet "local" 
+aaa authentication ftp "local" 
+aaa authentication ssh "local"

@@ -1,0 +1,54 @@
+---
+# Lab tests of the connection options documented in the aos8 cliconf plugin.
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Change the system name and save the configuration to flash
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: val-os1-saved
+        state: merged
+      vars:
+        ansible_aos_write_memory_flash: true
+        ansible_command_timeout: 90
+      register: result
+
+    - name: Read the state of the running directory
+      ale.aos8.aos8_command:
+        commands: show running-directory
+      register: directory
+
+    - name: Check that the configuration is saved
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - directory.stdout[0] is search('Running Configuration\s+:\s+SYNCHRONIZED')
+
+    - name: Change the system name without saving it
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: val-os1
+        state: merged
+      vars:
+        ansible_aos_write_memory_flash: false
+      register: result
+
+    - name: Read the state of the running directory
+      ale.aos8.aos8_command:
+        commands: show running-directory
+      register: directory
+
+    - name: Check that the configuration is not saved
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - directory.stdout[0] is search('Running Configuration\s+:\s+NOT SYNCHRONIZED')
+
+  always:
+    - name: Restore the system name and save it
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: val-os1
+        state: merged
+      vars:
+        ansible_aos_write_memory_flash: true
+        ansible_command_timeout: 90

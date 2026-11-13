@@ -1,5 +1,5 @@
 ---
-requires_ansible: ">=2.15.0"
+requires_ansible: ">=2.16.0"
 
 action_groups:
   aos8:
@@ -20,31 +20,60 @@ action_groups:
 
 plugin_routing:
   action:
-    aos8_bgp:
-      redirect: ale.aos8.aos8
-    aos8_command:
-      redirect: ale.aos8.aos8
-    aos8_config:
-      redirect: ale.aos8.aos8
-    aos8_facts:
-      redirect: ale.aos8.aos8
-    aos8_hostname:
-      redirect: ale.aos8.hostname
-    aos8_l2_interfaces:
-      redirect: ale.aos8.aos8
-    aos8_l3_interfaces:
-      redirect: ale.aos8.aos8
-    aos8_ntp:
-      redirect: ale.aos8.aos8
-    aos8_ospfv2:
-      redirect: ale.aos8.aos8
-    aos8_radius_servers:
-      redirect: ale.aos8.aos8
-    aos8_static_routes:
-      redirect: ale.aos8.aos8
-    aos8_switch_security:
-      redirect: ale.aos8.aos8
-    aos8_trap_managers:
-      redirect: ale.aos8.aos8
-    aos8_vlans:
-      redirect: ale.aos8.aos8
+    bgp:
+      redirect: ale.aos8.aos8_bgp
+    command:
+      redirect: ale.aos8.aos8_command
+    config:
+      redirect: ale.aos8.aos8_config
+    facts:
+      redirect: ale.aos8.aos8_facts
+    hostname:
+      redirect: ale.aos8.aos8_hostname
+    l2_interfaces:
+      redirect: ale.aos8.aos8_l2_interfaces
+    l3_interfaces:
+      redirect: ale.aos8.aos8_l3_interfaces
+    ntp:
+      redirect: ale.aos8.aos8_ntp
+    ospfv2:
+      redirect: ale.aos8.aos8_ospfv2
+    radius_servers:
+      redirect: ale.aos8.aos8_radius_servers
+    static_routes:
+      redirect: ale.aos8.aos8_static_routes
+    switch_security:
+      redirect: ale.aos8.aos8_switch_security
+    trap_managers:
+      redirect: ale.aos8.aos8_trap_managers
+    vlans:
+      redirect: ale.aos8.aos8_vlans
+  modules:
+    bgp:
+      redirect: ale.aos8.aos8_bgp
+    command:
+      redirect: ale.aos8.aos8_command
+    config:
+      redirect: ale.aos8.aos8_config
+    facts:
+      redirect: ale.aos8.aos8_facts
+    hostname:
+      redirect: ale.aos8.aos8_hostname
+    l2_interfaces:
+      redirect: ale.aos8.aos8_l2_interfaces
+    l3_interfaces:
+      redirect: ale.aos8.aos8_l3_interfaces
+    ntp:
+      redirect: ale.aos8.aos8_ntp
+    ospfv2:
+      redirect: ale.aos8.aos8_ospfv2
+    radius_servers:
+      redirect: ale.aos8.aos8_radius_servers
+    static_routes:
+      redirect: ale.aos8.aos8_static_routes
+    switch_security:
+      redirect: ale.aos8.aos8_switch_security
+    trap_managers:
+      redirect: ale.aos8.aos8_trap_managers
+    vlans:
+      redirect: ale.aos8.aos8_vlans

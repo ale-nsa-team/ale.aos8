@@ -1,0 +1,187 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+    - aaa authentication telnet default
+    - aaa authentication ftp default
+    - aaa authentication http default
+    - aaa authentication snmp default
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Authenticate Telnet, FTP and SNMP access with the local user database
+      ale.aos8.aos8_switch_security:
+        config:
+          - access_method: telnet
+            aaa_servers_name: local
+          - access_method: ftp
+            aaa_servers_name: local
+          - access_method: snmp
+            aaa_servers_name: local
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['aaa authentication telnet "local"', 'aaa authentication ftp "local"', 'aaa authentication snmp "local"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Authenticate Telnet, FTP and SNMP access with the local user database (run again: nothing changes)'
+      ale.aos8.aos8_switch_security:
+        config:
+          - access_method: telnet
+            aaa_servers_name: local
+          - access_method: ftp
+            aaa_servers_name: local
+          - access_method: snmp
+            aaa_servers_name: local
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Set the server of HTTP access
+      ale.aos8.aos8_switch_security:
+        config:
+          - access_method: http
+            aaa_servers_name: local
+        state: replaced
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['aaa authentication http "local"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Set the server of HTTP access (run again: nothing changes)'
+      ale.aos8.aos8_switch_security:
+        config:
+          - access_method: http
+            aaa_servers_name: local
+        state: replaced
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Read the access methods from the switch
+      ale.aos8.aos8_switch_security:
+        state: gathered
+      register: result
+    - name: Check the gathered data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - '{''access_method'': ''telnet'', ''aaa_servers_name'': ''local''} in result.gathered'
+          - '{''access_method'': ''default'', ''aaa_servers_name'': ''local''} in result.gathered'
+        fail_msg: '{{ result | to_json }}'
+    - name: Set FTP access back to the default servers
+      ale.aos8.aos8_switch_security:
+        config:
+          - access_method: ftp
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['aaa authentication ftp default']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Set FTP access back to the default servers (run again: nothing changes)'
+      ale.aos8.aos8_switch_security:
+        config:
+          - access_method: ftp
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Keep only these access methods (every other one goes back to the default servers)
+      ale.aos8.aos8_switch_security:
+        config:
+          - access_method: default
+            aaa_servers_name: local
+          - access_method: console
+            aaa_servers_name: local
+          - access_method: ssh
+            aaa_servers_name: local
+        state: overridden
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - '''aaa authentication telnet default'' in result.commands'
+          - '''aaa authentication http default'' in result.commands'
+          - '''aaa authentication snmp default'' in result.commands'
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Keep only these access methods (every other one goes back to the default servers) (run again: nothing changes)'
+      ale.aos8.aos8_switch_security:
+        config:
+          - access_method: default
+            aaa_servers_name: local
+          - access_method: console
+            aaa_servers_name: local
+          - access_method: ssh
+            aaa_servers_name: local
+        state: overridden
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Show the commands for an access method without connecting to the switch
+      ale.aos8.aos8_switch_security:
+        config:
+          - access_method: ssh
+            aaa_servers_name: rad1
+        state: rendered
+      register: result
+    - name: Check the rendered commands
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.rendered == ['aaa authentication ssh "rad1"']
+        fail_msg: '{{ result | to_json }}'
+    - name: Convert configuration lines into structured data
+      ale.aos8.aos8_switch_security:
+        running_config: |
+          aaa authentication default "local"
+          aaa authentication console "local"
+        state: parsed
+      register: result
+    - name: Check the parsed data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.parsed == [{''access_method'': ''default'', ''aaa_servers_name'': ''local''}, {''access_method'': ''console'', ''aaa_servers_name'': ''local''}]'
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+        - aaa authentication default "local"
+        - aaa authentication console "local"
+        - aaa authentication ssh "local"
+        - aaa authentication telnet default
+        - aaa authentication ftp default
+        - aaa authentication http default
+        - aaa authentication snmp default
+      changed_when: false
+      failed_when: false

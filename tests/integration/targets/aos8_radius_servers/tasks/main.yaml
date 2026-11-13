@@ -1,0 +1,269 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+    - no aaa radius-server "rad1"
+    - no aaa radius-server "rad2"
+    - no aaa radius-server "rad3"
+    - no aaa radius-server "rad4"
+    - vrf create vrf-val
+    - vrf default
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Create RADIUS servers
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad1
+            host: 192.168.121.251
+            key: Secret123
+          - name: rad2
+            host: 192.168.121.252
+            key: Secret123
+            auth_port: 1645
+            acct_port: 1646
+            retransmit: 5
+            timeout: 10
+            vrf: default
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['aaa radius-server "rad1" host 192.168.121.251 key ******** retransmit 3 timeout 2 auth-port 1812 acct-port 1813', 'aaa radius-server "rad2" host 192.168.121.252 key ********
+            retransmit 5 timeout 10 auth-port 1645 acct-port 1646']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Create RADIUS servers (run again: nothing changes)'
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad1
+            host: 192.168.121.251
+            key: Secret123
+          - name: rad2
+            host: 192.168.121.252
+            key: Secret123
+            auth_port: 1645
+            acct_port: 1646
+            retransmit: 5
+            timeout: 10
+            vrf: default
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Change the timeout of a server
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad1
+            host: 192.168.121.251
+            key: Secret123
+            timeout: 5
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['aaa radius-server "rad1" host 192.168.121.251 key ******** retransmit 3 timeout 5 auth-port 1812 acct-port 1813']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Change the timeout of a server (run again: nothing changes)'
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad1
+            host: 192.168.121.251
+            key: Secret123
+            timeout: 5
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Replace a server (ports, retries and timeout go back to their defaults)
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad2
+            host: 192.168.121.252
+            key: Secret123
+        state: replaced
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['aaa radius-server "rad2" host 192.168.121.252 key ******** retransmit 3 timeout 2 auth-port 1812 acct-port 1813']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Replace a server (ports, retries and timeout go back to their defaults) (run again: nothing changes)'
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad2
+            host: 192.168.121.252
+            key: Secret123
+        state: replaced
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Read the RADIUS servers from the switch
+      ale.aos8.aos8_radius_servers:
+        state: gathered
+      register: result
+    - name: Check the gathered data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - '{''name'': ''rad1'', ''host'': ''192.168.121.251'', ''retransmit'': 3, ''timeout'': 5, ''auth_port'': 1812, ''acct_port'': 1813, ''vrf'': ''default''} in result.gathered'
+          - '{''name'': ''rad2'', ''host'': ''192.168.121.252'', ''retransmit'': 3, ''timeout'': 2, ''auth_port'': 1812, ''acct_port'': 1813, ''vrf'': ''default''} in result.gathered'
+        fail_msg: '{{ result | to_json }}'
+    - name: Keep only rad1 (every other RADIUS server is removed)
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad1
+            host: 192.168.121.251
+            key: Secret123
+            timeout: 5
+        state: overridden
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no aaa radius-server "rad2"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Keep only rad1 (every other RADIUS server is removed) (run again: nothing changes)'
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad1
+            host: 192.168.121.251
+            key: Secret123
+            timeout: 5
+        state: overridden
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Show the commands for a server without connecting to the switch
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad9
+            host: 10.0.0.9
+            key: Secret123
+        state: rendered
+      register: result
+    - name: Check the rendered commands
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.rendered == ['aaa radius-server "rad9" host 10.0.0.9 key ******** retransmit 3 timeout 2 auth-port 1812 acct-port 1813']
+        fail_msg: '{{ result | to_json }}'
+    - name: Convert configuration lines into structured data
+      ale.aos8.aos8_radius_servers:
+        running_config: |
+          aaa radius-server "rad1" host 192.168.121.251 hash-key "25EA0FBE" retransmit 3 timeout 2 auth-port 1812 acct-port 1813 vrf-name default
+        state: parsed
+      register: result
+    - name: Check the parsed data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.parsed == [{''name'': ''rad1'', ''host'': ''192.168.121.251'', ''retransmit'': 3, ''timeout'': 2, ''auth_port'': 1812, ''acct_port'': 1813, ''vrf'': ''default''}]'
+        fail_msg: '{{ result | to_json }}'
+    - name: Remove a server
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad1
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no aaa radius-server "rad1"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove a server (run again: nothing changes)'
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad1
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Reach the RADIUS server through another VRF (no other server is configured)
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad4
+            host: 192.168.121.254
+            key: Secret123
+            vrf: vrf-val
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['aaa radius-server "rad4" host 192.168.121.254 key ******** retransmit 3 timeout 2 auth-port 1812 acct-port 1813 vrf-name vrf-val']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Reach the RADIUS server through another VRF (no other server is configured) (run again: nothing changes)'
+      ale.aos8.aos8_radius_servers:
+        config:
+          - name: rad4
+            host: 192.168.121.254
+            key: Secret123
+            vrf: vrf-val
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Remove every RADIUS server
+      ale.aos8.aos8_radius_servers:
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no aaa radius-server "rad4"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove every RADIUS server (run again: nothing changes)'
+      ale.aos8.aos8_radius_servers:
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+      changed_when: false
+      failed_when: false

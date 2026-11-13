@@ -1,0 +1,228 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+    - no ip static-route 172.31.1.0/24 gateway 10.10.10.254
+    - no ip static-route 172.31.1.0/24 gateway 10.10.10.253
+    - no ip static-route 172.31.2.0/24 gateway 10.10.10.254
+    - no ip static-route 172.31.3.0/24 interface "int_10"
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Create static routes
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.254
+              - dest: 172.31.2.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.254
+                    admin_distance: 5
+                    tag: 7
+                    description: Backup
+              - dest: 172.31.3.0/24
+                next_hops:
+                  - interface: int_10
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['ip static-route 172.31.1.0/24 gateway 10.10.10.254', 'ip static-route 172.31.2.0/24 gateway 10.10.10.254 tag 7 name "Backup" metric 5', 'ip static-route 172.31.3.0/24 interface
+            "int_10"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Create static routes (run again: nothing changes)'
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.254
+              - dest: 172.31.2.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.254
+                    admin_distance: 5
+                    tag: 7
+                    description: Backup
+              - dest: 172.31.3.0/24
+                next_hops:
+                  - interface: int_10
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Replace the next hop of a destination
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.253
+        state: replaced
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no ip static-route 172.31.1.0/24 gateway 10.10.10.254', 'ip static-route 172.31.1.0/24 gateway 10.10.10.253']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Replace the next hop of a destination (run again: nothing changes)'
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.253
+        state: replaced
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Read the static routes from the switch
+      ale.aos8.aos8_static_routes:
+        state: gathered
+      register: result
+    - name: Check the gathered data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.gathered[0].routes | selectattr(''dest'', ''equalto'', ''172.31.2.0/24'') | map(attribute=''next_hops'') | first == [{''forward_router_address'': ''10.10.10.254'', ''admin_distance'':
+            5, ''tag'': 7, ''description'': ''Backup''}]'
+          - 'result.gathered[0].routes | selectattr(''dest'', ''equalto'', ''172.31.3.0/24'') | map(attribute=''next_hops'') | first == [{''interface'': ''int_10'', ''admin_distance'': 1}]'
+        fail_msg: '{{ result | to_json }}'
+    - name: Keep only this route (every other static route is removed)
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.253
+        state: overridden
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - '''no ip static-route 172.31.2.0/24 gateway 10.10.10.254'' in result.commands'
+          - '''no ip static-route 172.31.3.0/24 interface "int_10"'' in result.commands'
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Keep only this route (every other static route is removed) (run again: nothing changes)'
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+                next_hops:
+                  - forward_router_address: 10.10.10.253
+        state: overridden
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Show the commands for a route without connecting to the switch
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 10.99.0.0/16
+                next_hops:
+                  - forward_router_address: 10.10.10.254
+                    admin_distance: 10
+        state: rendered
+      register: result
+    - name: Check the rendered commands
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.rendered == ['ip static-route 10.99.0.0/16 gateway 10.10.10.254 metric 10']
+        fail_msg: '{{ result | to_json }}'
+    - name: Convert configuration lines into structured data
+      ale.aos8.aos8_static_routes:
+        running_config: |
+          ip static-route 172.31.251.0/24 interface int_20 metric 1
+          ip static-route 172.31.253.0/24 gateway 10.10.10.2 metric 1 tag 7 name "valroute"
+        state: parsed
+      register: result
+    - name: Check the parsed data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.parsed == [{''routes'': [{''dest'': ''172.31.251.0/24'', ''next_hops'': [{''interface'': ''int_20'', ''admin_distance'': 1}]}, {''dest'': ''172.31.253.0/24'', ''next_hops'': [{''forward_router_address'':
+            ''10.10.10.2'', ''admin_distance'': 1, ''tag'': 7, ''description'': ''valroute''}]}]}]'
+        fail_msg: '{{ result | to_json }}'
+    - name: Remove every next hop of a destination
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no ip static-route 172.31.1.0/24 gateway 10.10.10.253']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove every next hop of a destination (run again: nothing changes)'
+      ale.aos8.aos8_static_routes:
+        config:
+          - routes:
+              - dest: 172.31.1.0/24
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Prepare: Remove every static route'
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - ip static-route 172.31.2.0/24 gateway 10.10.10.254
+      changed_when: false
+      failed_when: false
+    - name: Remove every static route
+      ale.aos8.aos8_static_routes:
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - '''no ip static-route 172.31.2.0/24 gateway 10.10.10.254'' in result.commands'
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove every static route (run again: nothing changes)'
+      ale.aos8.aos8_static_routes:
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+      changed_when: false
+      failed_when: false

@@ -1,12 +1,9 @@
 .. _ale.aos8.aos8_cliconf:
 
-
-**************
 ale.aos8.aos8
-**************
+*************
 
-**Use aos8 cliconf to run command on Alcatel-Lucent Enterprise AOS platform**
-
+**Use aos8 cliconf to run commands on Alcatel-Lucent Enterprise AOS 8 devices**
 
 Version added: 1.0.0
 
@@ -14,87 +11,74 @@ Version added: 1.0.0
    :local:
    :depth: 1
 
-
 Synopsis
 --------
-- This aos plugin provides low level abstraction apis for sending and receiving CLI commands from Alcatel-Lucent Enterprise AOS network devices.
 
-
-
+- This aos8 plugin provides low level abstraction APIs for sending and receiving CLI commands from Alcatel-Lucent Enterprise OmniSwitch devices running AOS 8.
+- The switch must run from the working directory. Configuration changes are refused when it runs from the certified directory.
 
 Parameters
 ----------
 
-.. raw:: html
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 20 44
 
-    <table  border=0 cellpadding=0 class="documentation-table">
-        <tr>
-            <th colspan="1">Parameter</th>
-            <th>Choices/<font color="blue">Defaults</font></th>
-                <th>Configuration</th>
-            <th width="100%">Comments</th>
-        </tr>
-            <tr>
-                <td colspan="1">
-                    <div class="ansibleOptionAnchor" id="parameter-"></div>
-                    <b>config_commands</b>
-                    <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
-                    <div style="font-size: small">
-                        <span style="color: purple">list</span>
-                         / <span style="color: purple">elements=string</span>
-                    </div>
-                    <div style="font-style: italic; font-size: small; color: darkgreen">added in 2.0.0</div>
-                </td>
-                <td>
-                        <b>Default:</b><br/><div style="color: blue">[]</div>
-                </td>
-                    <td>
-                                <div>var: ansible_aos8_config_commands</div>
-                    </td>
-                <td>
-                        <div>Specifies a list of commands that can make configuration changes to the target device.</div>
-                        <div>When `ansible_network_single_user_mode` is enabled, if a command sent to the device is present in this list, the existing cache is invalidated.</div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="1">
-                    <div class="ansibleOptionAnchor" id="parameter-"></div>
-                    <b>aos8_use_sessions</b>
-                    <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
-                    <div style="font-size: small">
-                        <span style="color: purple">boolean</span>
-                    </div>
-                </td>
-                <td>
-                        <b>Default:</b><br/><div style="color: blue">"yes"</div>
-                </td>
-                    <td>
-                                <div>env:ANSIBLE_AOS8_USE_SESSIONS</div>
-                                <div>var: ansible_aos8_use_sessions</div>
-                    </td>
-                <td>
-                        <div>Specifies if sessions should be used on remote host or not</div>
-                </td>
-            </tr>
-    </table>
-    <br/>
+   * - Parameter
+     - Type
+     - Choices / default
+     - Comments
+   * - ``flash_synchro_flag``
+     - boolean
+     - Default: ``false``
+     - Certifies the configuration after it is saved, with ``copy running certified``. The switch then boots with this configuration from the certified directory as well. Only used when ``write_memory_flag`` is enabled, so that the saved configuration is the one that gets certified. The command can take up to two minutes, so ``ansible_command_timeout`` must be 120 seconds or more when this option is enabled.
+   * - ``write_memory_flag``
+     - boolean
+     - Default: ``true``
+     - Saves the configuration to flash with ``write memory flash-synchro`` after each change made by a resource module or by ``ale.aos8.aos8_config``. The command can take a long time, so ``ansible_command_timeout`` must be 60 seconds or more when this option is enabled.
 
+Examples
+--------
 
+.. code-block:: yaml
 
+    # Inventory variables for a switch managed with this collection
+    #
+    # ansible_connection: ansible.netcommon.network_cli
+    # ansible_network_os: ale.aos8.aos8
+    # ansible_command_timeout: 90
+    # ansible_aos_write_memory_flash: true
+    # ansible_aos_flash_synchro_flag: false
 
+    - name: Change the system name and save the configuration to flash
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: val-os1-saved
+        state: merged
+      vars:
+        ansible_aos_write_memory_flash: true
+        ansible_command_timeout: 90
 
+    - name: Change the system name without saving it
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: val-os1
+        state: merged
+      vars:
+        ansible_aos_write_memory_flash: false
 
-
-
-Status
-------
-
+    - name: Change the system name, save it and certify it
+      ale.aos8.aos8_hostname:
+        config:
+          hostname: val-os1-certified
+        state: merged
+      vars:
+        ansible_aos_write_memory_flash: true
+        ansible_aos_flash_synchro_flag: true
+        ansible_command_timeout: 180
 
 Authors
-~~~~~~~
+-------
 
-- Mathias Guillemot (@Mathias-gt)
-
-
-.. hint::
-    Configuration entries for each entry type have a low to high priority order. For example, a variable that is lower in the list will override a variable that is higher up.
+- Samuel Yip Kah Yean (@samuelyip74)
+- Mathias Guillemot (@mathias-gt)

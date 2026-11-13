@@ -54,3 +54,11 @@ class ActionModule(ActionNetworkModule):
             else:
                 result["warnings"] = warnings
         return result
+
+    def _handle_backup_option(self, result, task_vars, backup_options):
+        # ansible.netcommon replaces "changed" with whether the backup file was
+        # written, so a configuration change was reported as not changed when the
+        # backup file already held the same content. Keep the module result.
+        module_changed = result.get("changed", False)
+        super(ActionModule, self)._handle_backup_option(result, task_vars, backup_options)
+        result["changed"] = bool(module_changed or result.get("changed"))
