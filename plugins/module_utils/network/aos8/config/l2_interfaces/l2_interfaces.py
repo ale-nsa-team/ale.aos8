@@ -104,7 +104,8 @@ class L2_interfaces(ConfigBase):
         elif self.state == "gathered":
             result["gathered"] = changed_l2_interfaces_facts
 
-        result["warnings"] = warnings
+        for warning in warnings:
+            self._module.warn(warning)
         return result
 
     def set_config(self, existing_l2_interfaces_facts):

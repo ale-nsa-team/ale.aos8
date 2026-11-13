@@ -92,7 +92,8 @@ class Static_routes(ConfigBase):
         elif self.state == "gathered":
             result["gathered"] = changed_static_routes_facts
 
-        result["warnings"] = warnings
+        for warning in warnings:
+            self._module.warn(warning)
         return result
 
     def set_config(self, existing_static_routes_facts):

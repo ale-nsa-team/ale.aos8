@@ -104,7 +104,8 @@ class Radius_servers(ConfigBase):
         elif self.state == "gathered":
             result["gathered"] = changed_radius_servers_facts
 
-        result["warnings"] = warnings
+        for warning in warnings:
+            self._module.warn(warning)
         return result
 
     def set_config(self, existing_radius_servers_facts):

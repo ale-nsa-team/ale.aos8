@@ -212,7 +212,7 @@ EXAMPLES = r"""
 """
 
 import time
-from ansible.module_utils._text import to_text
+from ansible.module_utils.common.text.converters import to_text
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.parsing import (
     Conditional,
@@ -251,8 +251,10 @@ def main():
         supports_check_mode=True,
     ) 
     warnings = list()
-    result = {"changed": False, "warnings": warnings}
+    result = {"changed": False}
     commands = parse_commands(module, warnings)
+    for warning in warnings:
+        module.warn(warning)
     responses = run_commands(module, commands)
 
     module.params["output"] = list(to_lines(responses))
