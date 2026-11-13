@@ -93,7 +93,8 @@ class Ospfv2(ConfigBase):
         elif self.state == "gathered":
             result["gathered"] = changed_ospfv2_facts
 
-        result["warnings"] = warnings
+        for warning in warnings:
+            self._module.warn(warning)
         return result
 
     def set_config(self, existing_ospfv2_facts):

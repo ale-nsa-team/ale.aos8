@@ -98,7 +98,8 @@ class Vlans(ConfigBase):
         elif self.state == "gathered":
             result["gathered"] = changed_vlans_facts
 
-        result["warnings"] = warnings
+        for warning in warnings:
+            self._module.warn(warning)
         return result
 
     def set_config(self, existing_vlans_facts):
