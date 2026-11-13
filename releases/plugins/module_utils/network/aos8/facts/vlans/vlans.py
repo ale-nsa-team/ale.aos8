@@ -180,7 +180,7 @@ class VlansFacts(object):
         config = data.split("\n")
         # Get individual vlan configs separately
         for conf in config:
-            match = re.match("^(?P<vlan_id>[\d]+).*(?P<type>std)\s*(?P<admin>Ena|Dis)\s*(?P<oper>Ena|Dis)\s*(?P<ip>Ena|Dis)\s*(?P<mtu>[\d]+)\s*(?P<name>.*)$", conf)
+            match = re.match(r"^(?P<vlan_id>[\d]+).*(?P<type>std)\s*(?P<admin>Ena|Dis)\s*(?P<oper>Ena|Dis)\s*(?P<ip>Ena|Dis)\s*(?P<mtu>[\d]+)\s*(?P<name>.*)$", conf)
             if match:
                 if match.group('admin') == 'Ena':
                     admin_state = "enable"  

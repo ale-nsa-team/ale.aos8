@@ -78,8 +78,8 @@ class L3_interfacesFacts(object):
         # Get individual IP Interface configs separately
         for conf in config:
             # Is VRF IP Interface
-            if (re.match("^vrf\s(.*)\sip", conf)):
-                match = re.match("^vrf\s(?P<vrfname>(([a-zA-Z]+)(\W)?([a-zA-Z]+)))\sip\sinterface\s\"(?P<name>.*)\"\saddress\s(?P<address>[\d.]+)\smask\s(?P<mask>[\d.]+)\s(?P<type>(vlan|tunnel|rtr-port))\s(?P<port_id>[\d]+)", conf)
+            if (re.match(r"^vrf\s(.*)\sip", conf)):
+                match = re.match(r'^vrf\s(?P<vrfname>(([a-zA-Z]+)(\W)?([a-zA-Z]+)))\sip\sinterface\s"(?P<name>.*)"\saddress\s(?P<address>[\d.]+)\smask\s(?P<mask>[\d.]+)\s(?P<type>(vlan|tunnel|rtr-port))\s(?P<port_id>[\d]+)', conf)
                 if match:
                     members_obj = {
                         'vrf'       :   match.group('vrfname'),
@@ -92,11 +92,11 @@ class L3_interfacesFacts(object):
                     objs.append(members_obj)                   
                 pass
             
-            elif (re.match("^ip\sinterface\s",conf)):
+            elif (re.match(r"^ip\sinterface\s",conf)):
                             
                 # Loopback interface
-                if(re.match("ip\sinterface\s\"Loopback",conf)):
-                    match = re.match("^ip\sinterface\s\"(?P<name>(Loopback[\d]+))\"\saddress\s(?P<address>[\d.]+)",conf)
+                if(re.match(r'ip\sinterface\s"Loopback',conf)):
+                    match = re.match(r'^ip\sinterface\s"(?P<name>(Loopback[\d]+))"\saddress\s(?P<address>[\d.]+)',conf)
                     if match:
                         members_obj = {
                             'name'      :   match.group('name'),
@@ -104,7 +104,7 @@ class L3_interfacesFacts(object):
                         }
                         objs.append(members_obj)          
                 else:            
-                    match = re.match("^ip\sinterface\s\"(?P<name>.*)\"\saddress\s(?P<address>[\d.]+)\smask\s(?P<mask>[\d.]+)\s(?P<type>(vlan|tunnel|rtr-port))\s(?P<port_id>[\d]+)", conf)
+                    match = re.match(r'^ip\sinterface\s"(?P<name>.*)"\saddress\s(?P<address>[\d.]+)\smask\s(?P<mask>[\d.]+)\s(?P<type>(vlan|tunnel|rtr-port))\s(?P<port_id>[\d]+)', conf)
                     if match:
                         members_obj = {
                             'name'      :   match.group('name'),
