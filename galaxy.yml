@@ -4,13 +4,25 @@ authors:
   - Maxime Descloux
   - Mathias Guillemot
 dependencies:
-  "ansible.netcommon": ">=6.0.0"
+  "ansible.netcommon": ">=6.1.0"
 license_file: LICENSE
 name: aos8
 namespace: ale
-description: Ansible Network Collection for Alcatel-Lucent AOS 8 devices.
+description: Ansible Network Collection for Alcatel-Lucent Enterprise OmniSwitch AOS 8 devices.
 readme: README.md
 repository: https://github.com/ale-nsa-team/ale.aos8
+documentation: https://github.com/ale-nsa-team/ale.aos8/tree/master/docs
+homepage: https://github.com/ale-nsa-team/ale.aos8
 issues: https://github.com/ale-nsa-team/ale.aos8/issues
-tags: [ale, aos, aos8, networking]
-version: "1.0.2"
+tags: [ale, alcatel, omniswitch, aos, aos8, networking]
+version: "1.1.0"
+build_ignore:
+  - .github
+  - .venv
+  - .tox
+  - .work
+  - collections
+  - logs
+  - tools
+  - tests/integration/inventory.yml
+  - "*.tar.gz"

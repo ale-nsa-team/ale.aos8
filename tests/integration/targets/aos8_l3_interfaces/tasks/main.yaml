@@ -1,0 +1,260 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+    - vlan 30 admin-state enable
+    - vlan 31 admin-state enable
+    - vrf create vrf-val
+    - vrf default
+    - no ip interface "int_30"
+    - no ip interface "Loopback0"
+    - vrf vrf-val no ip interface "int_31"
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Create a VLAN interface, Loopback0 and an interface in a VRF
+      ale.aos8.aos8_l3_interfaces:
+        config:
+          - name: int_30
+            address: 10.10.30.1
+            mask: 255.255.255.0
+            type: vlan
+            port_id: '30'
+          - name: Loopback0
+            address: 10.255.0.1
+          - name: int_31
+            vrf: vrf-val
+            address: 10.10.31.1
+            mask: 255.255.255.0
+            port_id: '31'
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['ip interface "int_30" address 10.10.30.1 mask 255.255.255.0 vlan 30', 'ip interface "Loopback0" address 10.255.0.1', 'vrf vrf-val ip interface "int_31" address 10.10.31.1
+            mask 255.255.255.0 vlan 31']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Create a VLAN interface, Loopback0 and an interface in a VRF (run again: nothing changes)'
+      ale.aos8.aos8_l3_interfaces:
+        config:
+          - name: int_30
+            address: 10.10.30.1
+            mask: 255.255.255.0
+            type: vlan
+            port_id: '30'
+          - name: Loopback0
+            address: 10.255.0.1
+          - name: int_31
+            vrf: vrf-val
+            address: 10.10.31.1
+            mask: 255.255.255.0
+            port_id: '31'
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Change the address of an interface
+      ale.aos8.aos8_l3_interfaces:
+        config:
+          - name: int_30
+            address: 10.10.30.254
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['ip interface "int_30" address 10.10.30.254 mask 255.255.255.0 vlan 30']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Change the address of an interface (run again: nothing changes)'
+      ale.aos8.aos8_l3_interfaces:
+        config:
+          - name: int_30
+            address: 10.10.30.254
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Replace the configuration of an interface
+      ale.aos8.aos8_l3_interfaces:
+        config:
+          - name: int_30
+            address: 10.10.30.1
+            mask: 255.255.255.0
+            port_id: '30'
+        state: replaced
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['ip interface "int_30" address 10.10.30.1 mask 255.255.255.0 vlan 30']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Replace the configuration of an interface (run again: nothing changes)'
+      ale.aos8.aos8_l3_interfaces:
+        config:
+          - name: int_30
+            address: 10.10.30.1
+            mask: 255.255.255.0
+            port_id: '30'
+        state: replaced
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Read the IP interfaces from the switch
+      ale.aos8.aos8_l3_interfaces:
+        state: gathered
+      register: result
+    - name: Check the gathered data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - '{''name'': ''int_30'', ''address'': ''10.10.30.1'', ''mask'': ''255.255.255.0'', ''type'': ''vlan'', ''port_id'': ''30''} in result.gathered'
+          - '{''name'': ''Loopback0'', ''address'': ''10.255.0.1''} in result.gathered'
+          - '{''name'': ''int_31'', ''vrf'': ''vrf-val'', ''address'': ''10.10.31.1'', ''mask'': ''255.255.255.0'', ''type'': ''vlan'', ''port_id'': ''31''} in result.gathered'
+        fail_msg: '{{ result | to_json }}'
+    - name: Keep only these interfaces (every other VLAN interface and Loopback0 are removed)
+      ale.aos8.aos8_l3_interfaces:
+        config:
+          - name: int_10
+            address: 10.10.10.1
+            mask: 255.255.255.0
+            port_id: '10'
+          - name: int_30
+            address: 10.10.30.1
+            mask: 255.255.255.0
+            port_id: '30'
+        state: overridden
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - '''no ip interface "Loopback0"'' in result.commands'
+          - '''vrf vrf-val no ip interface "int_31"'' in result.commands'
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Keep only these interfaces (every other VLAN interface and Loopback0 are removed) (run again: nothing changes)'
+      ale.aos8.aos8_l3_interfaces:
+        config:
+          - name: int_10
+            address: 10.10.10.1
+            mask: 255.255.255.0
+            port_id: '10'
+          - name: int_30
+            address: 10.10.30.1
+            mask: 255.255.255.0
+            port_id: '30'
+        state: overridden
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Show the commands for an interface without connecting to the switch
+      ale.aos8.aos8_l3_interfaces:
+        config:
+          - name: int_40
+            address: 10.10.40.1
+            mask: 255.255.255.0
+            port_id: '40'
+        state: rendered
+      register: result
+    - name: Check the rendered commands
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.rendered == ['ip interface "int_40" address 10.10.40.1 mask 255.255.255.0 vlan 40']
+        fail_msg: '{{ result | to_json }}'
+    - name: Convert configuration lines into structured data
+      ale.aos8.aos8_l3_interfaces:
+        running_config: |
+          ip interface "Loopback0" address 10.255.0.1
+          ip interface "int_10" address 10.10.10.1 mask 255.255.255.0 vlan 10 ifindex 1
+          vrf vrf-val ip interface "int_99" address 10.10.99.1 mask 255.255.255.0 vlan 99 ifindex 3
+        state: parsed
+      register: result
+    - name: Check the parsed data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.parsed == [{''name'': ''Loopback0'', ''address'': ''10.255.0.1''}, {''name'': ''int_10'', ''address'': ''10.10.10.1'', ''mask'': ''255.255.255.0'', ''type'': ''vlan'', ''port_id'': ''10''},
+            {''name'': ''int_99'', ''vrf'': ''vrf-val'', ''address'': ''10.10.99.1'', ''mask'': ''255.255.255.0'', ''type'': ''vlan'', ''port_id'': ''99''}]'
+        fail_msg: '{{ result | to_json }}'
+    - name: Remove an interface
+      ale.aos8.aos8_l3_interfaces:
+        config:
+          - name: int_30
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no ip interface "int_30"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove an interface (run again: nothing changes)'
+      ale.aos8.aos8_l3_interfaces:
+        config:
+          - name: int_30
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Remove every VLAN interface and Loopback0
+      ale.aos8.aos8_l3_interfaces:
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - '''no ip interface "int_10"'' in result.commands'
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove every VLAN interface and Loopback0 (run again: nothing changes)'
+      ale.aos8.aos8_l3_interfaces:
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+        - no ip interface "int_30"
+        - no ip interface "Loopback0"
+        - vrf vrf-val no ip interface "int_31"
+        - no vlan 30
+        - no vlan 31
+        - ip interface "int_10" address 10.10.10.1 mask 255.255.255.0 vlan 10
+      changed_when: false
+      failed_when: false

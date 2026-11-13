@@ -1,0 +1,16 @@
+---
+# Copy to inventory.yml and adapt. The lab tests change and remove configuration:
+# run them against a lab switch only, never against a production switch.
+all:
+  hosts:
+    val-os1:
+      ansible_host: 192.168.121.181
+  vars:
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_os: ale.aos8.aos8
+    ansible_user: admin
+    ansible_password: CHANGE_ME
+    ansible_command_timeout: 90
+    # the tests do not save to flash, except the tests that check saving
+    ansible_aos_write_memory_flash: false
+    ansible_aos_flash_synchro_flag: false

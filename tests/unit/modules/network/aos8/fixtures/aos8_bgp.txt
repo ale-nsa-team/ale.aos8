@@ -1,0 +1,7 @@
+! BGP:
+ip load bgp
+ip bgp autonomous-system 65001
+ip bgp neighbor 10.10.10.2
+ip bgp neighbor 10.10.10.2 remote-as 65002
+ip bgp neighbor 10.10.10.2 admin-state enable
+ip bgp admin-state enable

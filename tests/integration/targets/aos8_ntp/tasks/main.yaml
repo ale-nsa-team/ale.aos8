@@ -1,0 +1,217 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+    - no ntp server 192.168.121.247
+    - no ntp server 192.168.121.248
+    - no ntp server 192.168.121.250
+    - no ntp server 192.168.121.251
+    - no ntp server 192.168.121.252
+    - no ntp server 192.168.121.253
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Add NTP servers
+      ale.aos8.aos8_ntp:
+        config:
+          servers:
+            - server: 192.168.121.250
+            - server: 192.168.121.251
+              prefer: true
+            - server: 192.168.121.252
+              minpoll: 4
+              maxpoll: 12
+              version: 3
+            - server: 192.168.121.253
+              burst: true
+              iburst: true
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['ntp server 192.168.121.250', 'ntp server 192.168.121.251 prefer', 'ntp server 192.168.121.252 minpoll 4 maxpoll 12 version 3', 'ntp server 192.168.121.253 burst iburst']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Add NTP servers (run again: nothing changes)'
+      ale.aos8.aos8_ntp:
+        config:
+          servers:
+            - server: 192.168.121.250
+            - server: 192.168.121.251
+              prefer: true
+            - server: 192.168.121.252
+              minpoll: 4
+              maxpoll: 12
+              version: 3
+            - server: 192.168.121.253
+              burst: true
+              iburst: true
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Set the NTP version of servers
+      ale.aos8.aos8_ntp:
+        config:
+          servers:
+            - server: 192.168.121.247
+              version: 1
+            - server: 192.168.121.248
+              version: 2
+            - server: 192.168.121.250
+              version: 4
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['ntp server 192.168.121.247 version 1', 'ntp server 192.168.121.248 version 2']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Set the NTP version of servers (run again: nothing changes)'
+      ale.aos8.aos8_ntp:
+        config:
+          servers:
+            - server: 192.168.121.247
+              version: 1
+            - server: 192.168.121.248
+              version: 2
+            - server: 192.168.121.250
+              version: 4
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Keep two servers and clear the prefer option
+      ale.aos8.aos8_ntp:
+        config:
+          servers:
+            - server: 192.168.121.250
+            - server: 192.168.121.251
+        state: replaced
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no ntp server 192.168.121.247', 'no ntp server 192.168.121.248', 'no ntp server 192.168.121.252', 'no ntp server 192.168.121.253', 'no ntp server 192.168.121.251', 'ntp
+            server 192.168.121.251']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Keep two servers and clear the prefer option (run again: nothing changes)'
+      ale.aos8.aos8_ntp:
+        config:
+          servers:
+            - server: 192.168.121.250
+            - server: 192.168.121.251
+        state: replaced
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Read the NTP servers from the switch
+      ale.aos8.aos8_ntp:
+        state: gathered
+      register: result
+    - name: Check the gathered data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.gathered == {''servers'': [{''server'': ''192.168.121.250''}, {''server'': ''192.168.121.251''}]}'
+        fail_msg: '{{ result | to_json }}'
+    - name: Keep only one server
+      ale.aos8.aos8_ntp:
+        config:
+          servers:
+            - server: 192.168.121.250
+        state: overridden
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no ntp server 192.168.121.251']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Keep only one server (run again: nothing changes)'
+      ale.aos8.aos8_ntp:
+        config:
+          servers:
+            - server: 192.168.121.250
+        state: overridden
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Show the commands for an NTP server without connecting to the switch
+      ale.aos8.aos8_ntp:
+        config:
+          servers:
+            - server: 10.0.0.1
+              prefer: true
+        state: rendered
+      register: result
+    - name: Check the rendered commands
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.rendered == ['ntp server 10.0.0.1 prefer']
+        fail_msg: '{{ result | to_json }}'
+    - name: Convert configuration lines into structured data
+      ale.aos8.aos8_ntp:
+        running_config: |
+          ntp server 192.168.121.250
+          ntp server 192.168.121.251 prefer
+        state: parsed
+      register: result
+    - name: Check the parsed data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.parsed == {''servers'': [{''server'': ''192.168.121.250''}, {''server'': ''192.168.121.251'', ''prefer'': True}]}'
+        fail_msg: '{{ result | to_json }}'
+    - name: Remove every NTP server
+      ale.aos8.aos8_ntp:
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no ntp server 192.168.121.250']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove every NTP server (run again: nothing changes)'
+      ale.aos8.aos8_ntp:
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+      changed_when: false
+      failed_when: false

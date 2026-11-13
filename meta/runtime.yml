@@ -1,5 +1,5 @@
 ---
-requires_ansible: ">=2.15.0"
+requires_ansible: ">=2.16.0"
 
 action_groups:
   aos8:
@@ -29,7 +29,7 @@ plugin_routing:
     aos8_facts:
       redirect: ale.aos8.aos8
     aos8_hostname:
-      redirect: ale.aos8.hostname
+      redirect: ale.aos8.aos8
     aos8_l2_interfaces:
       redirect: ale.aos8.aos8
     aos8_l3_interfaces:

@@ -1,454 +1,292 @@
 #!/usr/bin/python
-#
-# This file is part of Ansible
-#
-# Ansible is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Ansible is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
-#
+# -*- coding: utf-8 -*-
+# Copyright (c) Alcatel-Lucent Enterprise
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 """
 The module file for aos8_l3_interfaces
 """
+
 from __future__ import absolute_import, division, print_function
 
 
 __metaclass__ = type
 
-DOCUMENTATION = """
+DOCUMENTATION = r"""
+---
 module: aos8_l3_interfaces
-short_description: Resource module to configure Layer 3 interface on AOS 8 devices
+short_description: Resource module to configure IP interfaces
 description:
-  This module provides declarative management of l3 interfaces on Alcatel-Lucent Enterprise AOS 8 network
-  devices.
+  - This module manages IPv4 interfaces bound to a VLAN, and Loopback0, on Alcatel-Lucent Enterprise OmniSwitch
+    devices running AOS 8.
+  - Interfaces of other kinds (EMP, router ports, tunnels) are not read or changed by this module.
 version_added: 1.0.0
-author: Samuel Yip Kah Yean (@samuelyip74)
+author:
+  - Samuel Yip Kah Yean (@samuelyip74)
+  - Mathias Guillemot (@mathias-gt)
 notes:
-  - Tested against Alcatel-Lucent Enterprise AOS 8 OmniSwitch with Version 8.9.221.R03 GA.
-  - This module works with connection C(network_cli).
+  - Tested against Alcatel-Lucent Enterprise OmniSwitch AOS 8.11.162.R01.
+  - This module works with connection C(ansible.netcommon.network_cli).
+  - After a change, the configuration is saved to flash with C(write memory flash-synchro), unless C(ansible_aos_write_memory_flash)
+    is set to C(false). Saving needs C(ansible_command_timeout) to be 60 seconds or more.
 options:
   config:
-    description: A list of dictionary for L3 interface options
+    description:
+      - A list of IP interfaces.
     type: list
     elements: dict
     suboptions:
-      vrf:
-        description:
-          - The unique name of the VRF instance
-        type: string
-        required: false
       name:
         description:
-          - The unique name of the IP interface
+          - Name of the IP interface. An interface whose name starts with C(Loopback) only takes an address.
         type: str
         required: true
-        choices:
-          - port
-          - linkagg        
       address:
         description:
-          - The IP address of the interface
+          - IPv4 address of the interface. Required unless O(state=deleted).
         type: str
-        required: true
       mask:
         description:
-          - The subnet mask of the interface
+          - Subnet mask in dotted decimal format, for example V(255.255.255.0). Required for a VLAN interface.
         type: str
-        required: false
-        choices:
-          - untagged
-          - tagged  
       type:
         description:
-          - The type of layer 3 interface
+          - Kind of device the interface is bound to. Only VLAN interfaces are supported.
         type: str
-        required: false
         choices:
           - vlan
-          - rtr-port
-          - tunnel     
       port_id:
         description:
-          - The vlan id, port number of the interface
+          - ID of the VLAN the interface is bound to. Required for a VLAN interface.
         type: str
-        required: false                       
+      vrf:
+        description:
+          - Name of the VRF the interface belongs to. The VRF must exist. Leave out for the default VRF.
+        type: str
   running_config:
     description:
-      - This option is used only with state I(parsed).
-      - The value of this option should be the output received from the aos8 device
-        by executing the command B(show configuration | grep "ip interface").
-      - The state I(parsed) reads the configuration from C(running_config) option and
-        transforms it into Ansible structured data as per the resource module's argspec
-        and the value is then returned in the I(parsed) key within the result.
+      - Text to convert into structured data. Only used with O(state=parsed).
+      - Give the output of C(show configuration snapshot | grep "ip interface") from the switch.
     type: str
   state:
     description:
-      - The state the configuration should be left in
-      - The states I(rendered), I(gathered) and I(parsed) does not perform any change
-        on the device.
-      - The state I(rendered) will transform the configuration in C(config) option to
-        platform specific CLI commands which will be returned in the I(rendered) key
-        within the result. For state I(rendered) active connection to remote host is
-        not required.
-      - The state I(gathered) will fetch the running configuration from device and transform
-        it into structured data in the format as per the resource module argspec and
-        the value is returned in the I(gathered) key within the result.
-      - The state I(parsed) reads the configuration from C(running_config) option and
-        transforms it into JSON format as per the resource module parameters and the
-        value is returned in the I(parsed) key within the result. The value of C(running_config)
-        option should be the same format as the output of command I(show running-config
-        | include ip route|ipv6 route) executed on device. For state I(parsed) active
-        connection to remote host is not required.
+      - What the module does with the given configuration.
+      - C(merged) adds the given configuration to the switch and changes only the attributes that are
+        given.
+      - C(replaced) makes each given entry match the task exactly. Attributes that are left out go back
+        to their default value.
+      - C(overridden) makes the whole resource match the task. Entries found on the switch that are not
+        in the task are removed.
+      - C(deleted) removes the given entries. Without O(config), every entry of this resource is removed.
+      - C(gathered) reads the configuration from the switch and returns it as RV(gathered). Nothing is
+        changed.
+      - C(rendered) returns the commands for the given configuration as RV(rendered), without connecting
+        to the switch.
+      - C(parsed) converts the text given in O(running_config) into structured data, returned as RV(parsed),
+        without connecting to the switch.
     type: str
     choices:
       - merged
       - replaced
       - overridden
       - deleted
-      - rendered  
       - gathered
+      - rendered
       - parsed
     default: merged
 """
 
-EXAMPLES = """
-# Using merged
+EXAMPLES = r"""
+- name: Create a VLAN interface, Loopback0 and an interface in a VRF
+  ale.aos8.aos8_l3_interfaces:
+    config:
+      - name: int_30
+        address: 10.10.30.1
+        mask: 255.255.255.0
+        type: vlan
+        port_id: '30'
+      - name: Loopback0
+        address: 10.255.0.1
+      - name: int_31
+        vrf: vrf-val
+        address: 10.10.31.1
+        mask: 255.255.255.0
+        port_id: '31'
+    state: merged
 
-# Before state:
-# -------------
-#
-# ip interface "Loopback0" address 10.1.1.1
-# ip interface "intvlan1" address 192.168.1.1 mask 255.255.255.0 vlan 1 
-# vrf MGNT ip interface "L3VPN" address 192.168.1.1 mask 255.255.255.0 vlan 51
+# Commands sent to the switch
+# ---------------------------
+# ip interface "int_30" address 10.10.30.1 mask 255.255.255.0 vlan 30
+# ip interface "Loopback0" address 10.255.0.1
+# vrf vrf-val ip interface "int_31" address 10.10.31.1 mask 255.255.255.0 vlan 31
 
+- name: Change the address of an interface
+  ale.aos8.aos8_l3_interfaces:
+    config:
+      - name: int_30
+        address: 10.10.30.254
+    state: merged
 
----
-- hosts: all
-  gather_facts: true
-  ignore_errors: true
-  name: L3 Interface merged with flash_synchro (true)
-  vars:
-    ansible_aos_write_memory_flash  : false
-    ansible_aos_flash_synchro_flag : false
-  tasks:
-    - name: Run L3 interfaces resource module with state merged
-      ale.aos8.aos8_l3_interfaces:
-        config:
-          - name: intvlan33
-            address: 192.168.33.1
-            mask: 255.255.255.0
-            type: vlan
-            port_id: 33
-        state: merged
+# Commands sent to the switch
+# ---------------------------
+# ip interface "int_30" address 10.10.30.254 mask 255.255.255.0 vlan 30
 
+- name: Replace the configuration of an interface
+  ale.aos8.aos8_l3_interfaces:
+    config:
+      - name: int_30
+        address: 10.10.30.1
+        mask: 255.255.255.0
+        port_id: '30'
+    state: replaced
 
-# After state:
-# ------------
-# 
-# ip interface "Loopback0" address 10.1.1.1
-# ip interface "intvlan1" address 192.168.1.1 mask 255.255.255.0 vlan 1 
-# ip interface "intvlan33" address 192.168.33.1 mask 255.255.255.0 vlan 33 
-# vrf MGNT ip interface "L3VPN" address 192.168.1.1 mask 255.255.255.0 vlan 51
+# Commands sent to the switch
+# ---------------------------
+# ip interface "int_30" address 10.10.30.1 mask 255.255.255.0 vlan 30
 
+- name: Read the IP interfaces from the switch
+  ale.aos8.aos8_l3_interfaces:
+    state: gathered
 
-# results : {
-#     "after": [
-#         {
-#             "name": "Loopback0",
-#             "address": "10.1.1.1",
-#         },
-#         {
-#             "name": "intvlan1",
-#             "address": "192.168.1.1",
-#             "mask": "255.255.255.0",
-#             "type": "vlan",
-#             "port_id": "1",
-#         },
-#         {
-#             "name": "intvlan33",
-#             "address": "192.168.33.1",
-#             "mask": "255.255.255.0",
-#             "type": "vlan",
-#             "port_id": "33",
-#         },
-#         {
-#             "vrf": "MGNT",
-#             "name": "L3VPN",
-#             "address": "192.168.1.1",
-#             "mask": "255.255.255.0",
-#             "type": "vlan",
-#             "port_id": "51",
-#         },
-#     ],
-#     "changed": true,
-#     "commands": [
-#         "ip interface intvlan33 address 192.168.33.1 mask 255.255.255.0 vlan 33"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#                 {
-#                   "name": "intvlan33",
-#                   "address": "192.168.33.1",
-#                   "mask": "255.255.255.0",
-#                   "type": "vlan",
-#                   "port_id": "33",
-#                 }
-#             ],
-#             "running_config": null,
-#             "state": "merged"
-#         }
-#     }
-# }
+- name: Keep only these interfaces (every other VLAN interface and Loopback0 are removed)
+  ale.aos8.aos8_l3_interfaces:
+    config:
+      - name: int_10
+        address: 10.10.10.1
+        mask: 255.255.255.0
+        port_id: '10'
+      - name: int_30
+        address: 10.10.30.1
+        mask: 255.255.255.0
+        port_id: '30'
+    state: overridden
 
-# Using overridden
-#
-# Before state:
-# -------------
-#
-# ip interface "Loopback0" address 10.1.1.1
-# ip interface "intvlan1" address 192.168.1.1 mask 255.255.255.0 vlan 1 
-# vrf MGNT ip interface "L3VPN" address 192.168.1.1 mask 255.255.255.0 vlan 51
+# Commands sent to the switch (other entries found on the switch are removed in the same way)
+# -------------------------------------------------------------------------------------------
+# no ip interface "Loopback0"
+# vrf vrf-val no ip interface "int_31"
 
----
-- hosts: all
-  gather_facts: true
-  ignore_errors: true
-  name: L3 Interface overridden with flash_synchro (true)
-  vars:
-    ansible_aos_flash_synchro_flag : true
-  tasks:
-    - name: Run L3 interfaces resource module with state overridden
-      ale.aos8.aos8_l3_interfaces:
-        config:
-          - name: intvlan1
-            address: 192.168.1.1
-            mask: 255.255.255.0
-            type: vlan
-            port_id: 1
-          - name: Loopback0
-            address: 10.2.1.1
-          - name: L3VPN
-            address: 192.168.1.1
-            mask: 255.255.255.0
-            type: vlan
-            port_id: 51
-            vrf: MGNT                                             
-        state: overridden
+- name: Show the commands for an interface without connecting to the switch
+  ale.aos8.aos8_l3_interfaces:
+    config:
+      - name: int_40
+        address: 10.10.40.1
+        mask: 255.255.255.0
+        port_id: '40'
+    state: rendered
 
-# After state:
-# ------------
-# 
-# ip interface "Loopback0" address 10.2.1.1
-# ip interface "intvlan1" address 192.168.1.1 mask 255.255.255.0 vlan 1 
-# vrf MGNT ip interface "L3VPN" address 192.168.1.1 mask 255.255.255.0 vlan 51
+# Value returned as rendered
+# --------------------------
+# - ip interface "int_40" address 10.10.40.1 mask 255.255.255.0 vlan 40
 
-# results : {
-#     "after": [
-#         {
-#             "name": "Loopback0",
-#             "address": "10.2.1.1",
-#         },
-#         {
-#             "name": "intvlan1",
-#             "address": "192.168.1.1",
-#             "mask": "255.255.255.0",
-#             "type": "vlan",
-#             "port_id": "1",
-#         },
-#         {
-#             "vrf": "MGNT",
-#             "name": "L3VPN",
-#             "address": "192.168.1.1",
-#             "mask": "255.255.255.0",
-#             "type": "vlan",
-#             "port_id": "51",
-#         },
-#     ],
-#     "changed": true,
-#     "commands": [
-#         "ip interface Loopback0 10.2.1.1"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#                 {
-#                   "name": "Loopback0",
-#                   "address": "10.2.1.1",
-#                 }
-#             ],
-#             "running_config": null,
-#             "state": "overridden"
-#         }
-#     }
-# }
- 
-# Using deleted
-#
-# Before state:
-# -------------
-#
-# ip interface "Loopback0" address 10.1.1.1
-# ip interface "intvlan1" address 192.168.1.1 mask 255.255.255.0 vlan 1 
-# ip interface "intvlan33" address 192.168.33.1 mask 255.255.255.0 vlan 33 
-# vrf MGNT ip interface "L3VPN" address 192.168.1.1 mask 255.255.255.0 vlan 51
+- name: Convert configuration lines into structured data
+  ale.aos8.aos8_l3_interfaces:
+    running_config: |
+      ip interface "Loopback0" address 10.255.0.1
+      ip interface "int_10" address 10.10.10.1 mask 255.255.255.0 vlan 10 ifindex 1
+      vrf vrf-val ip interface "int_99" address 10.10.99.1 mask 255.255.255.0 vlan 99 ifindex 3
+    state: parsed
 
----
-- hosts: all
-  gather_facts: true
-  ignore_errors: true
-  name: L3 Interface deleted with flash_synchro (true)
-  vars:
-    ansible_aos_write_memory_flash  : false
-    ansible_aos_flash_synchro_flag : false
-  tasks:
-    - name: Run L3 interfaces resource module with state deleted
-      ale.aos8.aos8_l3_interfaces:
-        config:
-          - name: intvlan33
-            address: 192.168.33.1
-            mask: 255.255.255.0
-            type: vlan
-            port_id: 33
-        state: deleted
+# Value returned as parsed
+# ------------------------
+# - name: Loopback0
+#   address: 10.255.0.1
+# - name: int_10
+#   address: 10.10.10.1
+#   mask: 255.255.255.0
+#   type: vlan
+#   port_id: '10'
+# - name: int_99
+#   vrf: vrf-val
+#   address: 10.10.99.1
+#   mask: 255.255.255.0
+#   type: vlan
+#   port_id: '99'
 
-# After state:
-# -------------
-# ip interface "Loopback0" address 10.1.1.1
-# ip interface "intvlan1" address 192.168.1.1 mask 255.255.255.0 vlan 1 
-# vrf MGNT ip interface "L3VPN" address 192.168.1.1 mask 255.255.255.0 vlan 51
+- name: Remove an interface
+  ale.aos8.aos8_l3_interfaces:
+    config:
+      - name: int_30
+    state: deleted
 
-# results: {
-#     "after": [
-#         {
-#             "name": "Loopback0",
-#             "address": "10.1.1.1",
-#         },
-#         {
-#             "name": "intvlan1",
-#             "address": "192.168.1.1",
-#             "mask": "255.255.255.0",
-#             "type": "vlan",
-#             "port_id": "1",
-#         },
-#         {
-#             "vrf": "MGNT",
-#             "name": "L3VPN",
-#             "address": "192.168.1.1",
-#             "mask": "255.255.255.0",
-#             "type": "vlan",
-#             "port_id": "51",
-#         },
-#     ],
-#     "changed": true,
-#     "commands": [
-#         "no ip interface intvlan33"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#                 {
-#                   "name": "intvlan33",
-#                   "address": "192.168.33.1",
-#                   "mask": "255.255.255.0",
-#                   "type": "vlan",
-#                   "port_id": "33",
-#                 }
-#             ],
-#             "running_config": null,
-#             "state": "deleted"
-#         }
-#     }
-# }
+# Commands sent to the switch
+# ---------------------------
+# no ip interface "int_30"
 
-# Using Rendered
-#
-# Before state:
-# -------------
-# ip interface "Loopback0" address 10.1.1.1
-# ip interface "intvlan1" address 192.168.1.1 mask 255.255.255.0 vlan 1 
-# vrf MGNT ip interface "L3VPN" address 192.168.1.1 mask 255.255.255.0 vlan 51
-#
----
-- hosts: all
-  gather_facts: true
-  ignore_errors: true
-  name: L3 Interface rendered 
-  vars:
-    ansible_aos_write_memory_flash  : false
-    ansible_aos_flash_synchro_flag : false
-  tasks:
-    - name: Run L3 interfaces resource module with state rendered
-      ale.aos8.aos8_l3_interfaces:
-        config:
-          - name: intvlan33
-            address: 192.168.33.1
-            mask: 255.255.255.0
-            type: vlan
-            port_id: 33
-        state: rendered
+- name: Remove every VLAN interface and Loopback0
+  ale.aos8.aos8_l3_interfaces:
+    state: deleted
 
-# results: {
-#     "after": [
-#     ],
-#     "changed": false,
-#     "commands": [
-#         "ip interface intvlan33 address 192.168.33.1 mask 255.255.255.0 vlan 33"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#                 {
-#                   "name": "intvlan33",
-#                   "address": "192.168.33.1",
-#                   "mask": "255.255.255.0",
-#                   "type": "vlan",
-#                   "port_id": "33",
-#                 }
-#             ],
-#             "running_config": null,
-#             "state": "rendered"
-#         }
-#     }
-# }
-
+# Commands sent to the switch (other entries found on the switch are removed in the same way)
+# -------------------------------------------------------------------------------------------
+# no ip interface "int_10"
 """
 
-RETURN = """
+RETURN = r"""
+---
 before:
-  description: The configuration as structured data prior to module invocation.
-  returned: always
+  description: The configuration found on the switch before the module ran.
+  returned: when O(state) is C(merged) or C(replaced) or C(overridden) or C(deleted)
   type: list
-  sample: >
-    The configuration returned will always be in the same format
-     of the parameters above.
+  elements: dict
+  sample: The configuration in the format of the O(config) option.
 after:
-  description: The configuration as structured data after module completion.
-  returned: when changed
+  description: The configuration found on the switch after the module ran.
+  returned: when the module changed the switch
   type: list
-  sample: >
-    The configuration returned will always be in the same format
-     of the parameters above.
+  elements: dict
+  sample: The configuration in the format of the O(config) option.
 commands:
-  description: The set of commands pushed to the remote device.
-  returned: always
+  description: The commands sent to the switch. In check mode, the commands that would be sent.
+  returned: when O(state) is C(merged) or C(replaced) or C(overridden) or C(deleted)
   type: list
-  sample: ['ip interface intvlan33 address 192.168.33.1 mask 255.255.255.0 vlan 33']
+  elements: str
+  sample:
+    - ip interface "int_30" address 10.10.30.1 mask 255.255.255.0 vlan 30
+    - ip interface "Loopback0" address 10.255.0.1
+    - vrf vrf-val ip interface "int_31" address 10.10.31.1 mask 255.255.255.0 vlan 31
+gathered:
+  description: The configuration read from the switch.
+  returned: when O(state) is C(gathered)
+  type: list
+  elements: dict
+  sample: The configuration in the format of the O(config) option.
+parsed:
+  description: The structured data built from O(running_config).
+  returned: when O(state) is C(parsed)
+  type: list
+  elements: dict
+  sample:
+    - name: Loopback0
+      address: 10.255.0.1
+    - name: int_10
+      address: 10.10.10.1
+      mask: 255.255.255.0
+      type: vlan
+      port_id: '10'
+    - name: int_99
+      vrf: vrf-val
+      address: 10.10.99.1
+      mask: 255.255.255.0
+      type: vlan
+      port_id: '99'
+rendered:
+  description: The commands for the given configuration.
+  returned: when O(state) is C(rendered)
+  type: list
+  elements: str
+  sample:
+    - ip interface "int_40" address 10.10.40.1 mask 255.255.255.0 vlan 40
 """
+
 from ansible.module_utils.basic import AnsibleModule
 
 from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.l3_interfaces.l3_interfaces import (
     L3_interfacesArgs,
 )
-from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.l3_interfaces.l3_interfaces import L3_interfaces
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.l3_interfaces.l3_interfaces import (
+    L3_interfaces,
+)
 
 
 def main():
@@ -457,25 +295,22 @@ def main():
 
     :returns: the result form module invocation
     """
-    required_if = [
-        ("state", "merged", ("config",)),
-        ("state", "replaced", ("config",)),
-        ("state", "overridden", ("config",)),
-        ("state", "rendered", ("config",)),           
-        ("state", "parsed", ("running_config",)),     ### TODO: yet to be implemented
-    ]
-    mutually_exclusive = [("config", "running_config")]
-
     module = AnsibleModule(
         argument_spec=L3_interfacesArgs.argument_spec,
-        required_if=required_if,
-        mutually_exclusive=mutually_exclusive,
+        mutually_exclusive=[["config", "running_config"]],
+        required_if=[
+            ["state", "merged", ["config"]],
+            ["state", "replaced", ["config"]],
+            ["state", "overridden", ["config"]],
+            ["state", "rendered", ["config"]],
+            ["state", "parsed", ["running_config"]],
+        ],
         supports_check_mode=True,
     )
 
     result = L3_interfaces(module).execute_module()
     module.exit_json(**result)
 
+
 if __name__ == "__main__":
     main()
-

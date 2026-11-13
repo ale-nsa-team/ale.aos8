@@ -1,0 +1,55 @@
+---
+# Runs every lab test against a real or virtual OmniSwitch.
+#
+#   ansible-playbook -i tests/integration/inventory.yml tests/integration/lab.yml
+#   ansible-playbook -i tests/integration/inventory.yml tests/integration/lab.yml -e targets=aos8_vlans,aos8_ntp
+#
+# Expected state of the switch before the run (see tests/integration/README.md):
+# system name val-os1, VLAN 10 "VAL-ISL" with port 1/1/1 tagged,
+# IP interface int_10 10.10.10.1/24 on VLAN 10, local authentication.
+- name: ale.aos8 lab tests
+  hosts: all
+  gather_facts: false
+  vars:
+    all_targets:
+      - aos8_command
+      - aos8_facts
+      - aos8_config
+      - aos8_vlans
+      - aos8_l2_interfaces
+      - aos8_l3_interfaces
+      - aos8_static_routes
+      - aos8_ospfv2
+      - aos8_bgp
+      - aos8_ntp
+      - aos8_radius_servers
+      - aos8_trap_managers
+      - aos8_switch_security
+      - aos8_hostname
+      - aos8_cliconf
+    selected: "{{ (targets.split(',') if targets is defined else all_targets) }}"
+  tasks:
+    - name: Run each target and record the result
+      ansible.builtin.include_tasks: run_target.yml
+      loop: "{{ selected }}"
+      loop_control:
+        loop_var: target
+
+    - name: Save the results to lab-results.json
+      ansible.builtin.copy:
+        content: "{{ lab_results | default({}) | to_nice_json }}"
+        dest: "{{ playbook_dir }}/lab-results.json"
+        mode: "0644"
+      delegate_to: localhost
+
+    - name: Results
+      ansible.builtin.debug:
+        msg: "LABTEST {{ item.key }}: {{ item.value }}"
+      loop: "{{ lab_results | default({}) | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"
+
+    - name: Fail when a target failed
+      ansible.builtin.assert:
+        that: lab_results.values() | select('match', 'FAILED') | list | length == 0
+        fail_msg: "{{ lab_results | dict2items | selectattr('value', 'match', 'FAILED') | map(attribute='key') | join(', ') }} failed"

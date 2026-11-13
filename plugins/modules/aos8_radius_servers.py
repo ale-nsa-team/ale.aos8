@@ -1,437 +1,301 @@
 #!/usr/bin/python
-#
-# This file is part of Ansible
-#
-# Ansible is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Ansible is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
-#
+# -*- coding: utf-8 -*-
+# Copyright (c) Alcatel-Lucent Enterprise
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 """
 The module file for aos8_radius_servers
 """
+
 from __future__ import absolute_import, division, print_function
 
 
 __metaclass__ = type
 
-DOCUMENTATION = """
+DOCUMENTATION = r"""
+---
 module: aos8_radius_servers
-short_description: Resource module to configure VLAN membership on AOS8 devices
+short_description: Resource module to configure RADIUS servers
 description:
-  This module provides declarative management of l2 interfaces on Alcatel-Lucent Enterprise AOS 8 network
-  devices.
+  - This module manages RADIUS servers on Alcatel-Lucent Enterprise OmniSwitch devices running AOS 8.
+  - The switch stores the shared secret hashed, so the module cannot tell whether O(config[].key) changed.
+    The secret is only sent when the server is created or when another attribute changes.
+  - The shared secret is replaced by C(********) in the RV(commands) and RV(rendered) returned by the
+    module.
+  - Every RADIUS server of the switch must use the same VRF.
 version_added: 1.0.0
-author: Samuel Yip Kah Yean (@samuelyip74)
+author:
+  - Samuel Yip Kah Yean (@samuelyip74)
+  - Mathias Guillemot (@mathias-gt)
 notes:
-  - Tested against Alcatel-Lucent Enterprise AOS 8 OmniSwitch with Version 8.9.221.R03 GA.
-  - This module works with connection C(network_cli).
+  - Tested against Alcatel-Lucent Enterprise OmniSwitch AOS 8.11.162.R01.
+  - This module works with connection C(ansible.netcommon.network_cli).
+  - After a change, the configuration is saved to flash with C(write memory flash-synchro), unless C(ansible_aos_write_memory_flash)
+    is set to C(false). Saving needs C(ansible_command_timeout) to be 60 seconds or more.
 options:
   config:
-    description: A dictionary of VLANs options
+    description:
+      - A list of RADIUS servers.
     type: list
     elements: dict
     suboptions:
-      vlan_id:
+      name:
         description:
-          - ID of the VLAN. Range 1-4094
+          - Name of the RADIUS server on the switch.
+        type: str
+        required: true
+      host:
+        description:
+          - IP address or DNS name of the RADIUS server. Required unless O(state=deleted).
+        type: str
+      key:
+        description:
+          - Shared secret of the RADIUS server. Required when the server is created or changed.
+        type: str
+      auth_port:
+        description:
+          - UDP port for authentication requests.
         type: int
-        required: true
-      port_type:
+        default: 1812
+      acct_port:
         description:
-          - The type of L2 interface
-          - Refer to vendor documentation for valid values.
-        type: str
-        required: true
-        choices:
-          - port
-          - linkagg        
-      port_number:
+          - UDP port for accounting requests.
+        type: int
+        default: 1813
+      retransmit:
         description:
-          - The physical port number of logical linkagg number
-        type: str
-        required: true
-      mode:
+          - Number of retries before the server is considered unreachable.
+        type: int
+        default: 3
+      timeout:
         description:
-          - The type of encapsulation (802.1q or clear)
+          - Time in seconds the switch waits for an answer from the server.
+        type: int
+        default: 2
+      vrf:
+        description:
+          - Name of the VRF used to reach the server. The VRF must exist, and every RADIUS server of the
+            switch must use the same VRF.
         type: str
-        required: true
-        choices:
-          - untagged
-          - tagged          
+        default: default
   running_config:
     description:
-      - This option is used only with state I(parsed).
-      - The value of this option should be the output received from the aos8 device
-        by executing the command B(show vlan).
-      - The state I(parsed) reads the configuration from C(running_config) option and
-        transforms it into Ansible structured data as per the resource module's argspec
-        and the value is then returned in the I(parsed) key within the result.
+      - Text to convert into structured data. Only used with O(state=parsed).
+      - Give the output of C(show configuration snapshot | grep "aaa radius-server") from the switch.
     type: str
   state:
     description:
-      - The state the configuration should be left in
-      - The states I(rendered), I(gathered) and I(parsed) does not perform any change
-        on the device.
-      - The state I(rendered) will transform the configuration in C(config) option to
-        platform specific CLI commands which will be returned in the I(rendered) key
-        within the result. For state I(rendered) active connection to remote host is
-        not required.
-      - The state I(gathered) will fetch the running configuration from device and transform
-        it into structured data in the format as per the resource module argspec and
-        the value is returned in the I(gathered) key within the result.
-      - The state I(parsed) reads the configuration from C(running_config) option and
-        transforms it into JSON format as per the resource module parameters and the
-        value is returned in the I(parsed) key within the result. The value of C(running_config)
-        option should be the same format as the output of command I(show running-config
-        | include ip route|ipv6 route) executed on device. For state I(parsed) active
-        connection to remote host is not required.
+      - What the module does with the given configuration.
+      - C(merged) adds the given configuration to the switch and changes only the attributes that are
+        given.
+      - C(replaced) makes each given entry match the task exactly. Attributes that are left out go back
+        to their default value.
+      - C(overridden) makes the whole resource match the task. Entries found on the switch that are not
+        in the task are removed.
+      - C(deleted) removes the given entries. Without O(config), every entry of this resource is removed.
+      - C(gathered) reads the configuration from the switch and returns it as RV(gathered). Nothing is
+        changed.
+      - C(rendered) returns the commands for the given configuration as RV(rendered), without connecting
+        to the switch.
+      - C(parsed) converts the text given in O(running_config) into structured data, returned as RV(parsed),
+        without connecting to the switch.
     type: str
     choices:
       - merged
       - replaced
       - overridden
       - deleted
-      - rendered  
       - gathered
+      - rendered
       - parsed
     default: merged
 """
 
-EXAMPLES = """
-# Using merged
+EXAMPLES = r"""
+- name: Create RADIUS servers
+  ale.aos8.aos8_radius_servers:
+    config:
+      - name: rad1
+        host: 192.168.121.251
+        key: Secret123
+      - name: rad2
+        host: 192.168.121.252
+        key: Secret123
+        auth_port: 1645
+        acct_port: 1646
+        retransmit: 5
+        timeout: 10
+        vrf: default
+    state: merged
 
-# Before state:
-# -------------
-#
-# ACSW01-> show vlan 1 members
-#    port      type        status
-# ----------+-----------+---------------
-#   1/1/26     untagged     forwarding
-#   1/1/27     untagged     forwarding
-#   1/1/28     untagged     forwarding
+# Commands sent to the switch
+# ---------------------------
+# aaa radius-server "rad1" host 192.168.121.251 key ******** retransmit 3 timeout 2 auth-port 1812 acct-port 1813
+# aaa radius-server "rad2" host 192.168.121.252 key ******** retransmit 5 timeout 10 auth-port 1645 acct-port 1646
 
+- name: Change the timeout of a server
+  ale.aos8.aos8_radius_servers:
+    config:
+      - name: rad1
+        host: 192.168.121.251
+        key: Secret123
+        timeout: 5
+    state: merged
 
----
-- hosts: all
-  gather_facts: true
-  ignore_errors: true
-  name: L2 Interface merged with flash_synchro (true)
-  vars:
-    ansible_aos_flash_synchro_flag : true
-  tasks:
-    - name: Run L2 interfaces resource module with state merged
-      ale.aos8.aos8_l2_interfaces:
-        config:
-          - vlan_id: 10
-            port_type: port
-            port_number: 1/1/27
-            mode: untagged
-        state: merged
+# Commands sent to the switch
+# ---------------------------
+# aaa radius-server "rad1" host 192.168.121.251 key ******** retransmit 3 timeout 5 auth-port 1812 acct-port 1813
 
+- name: Replace a server (ports, retries and timeout go back to their defaults)
+  ale.aos8.aos8_radius_servers:
+    config:
+      - name: rad2
+        host: 192.168.121.252
+        key: Secret123
+    state: replaced
 
-# After state:
-# ------------
-# 
-# ACSW01-> show vlan 10 members
-#    port      type        status
-# ----------+-----------+---------------
-#   1/1/27     untagged      forwarding
+# Commands sent to the switch
+# ---------------------------
+# aaa radius-server "rad2" host 192.168.121.252 key ******** retransmit 3 timeout 2 auth-port 1812 acct-port 1813
 
+- name: Read the RADIUS servers from the switch
+  ale.aos8.aos8_radius_servers:
+    state: gathered
 
-# results : {
-#     "after": [
-#         {
-#             "mode": "untagged",
-#             "port_number": "1/1/28",
-#             "port_type": "port",
-#             "vlan_id": 1
-#         },
-#         {
-#             "mode": "untagged",
-#             "port_number": "1/1/27,
-#             "port_type": "port",
-#             "vlan_id": 10
-#         },
-#         {
-#             "mode": "untagged",
-#             "port_number": "1/1/26",
-#             "port_type": "port",
-#             "vlan_id": 1
-#         },
-#     ],
-#     "changed": true,
-#     "commands": [
-#         "vlan 10 members port 1/1/27 untagged"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#                 {
-#                     "mode": "untagged",
-#                     "port_number": "1/1/27",
-#                     "port_type": "port",
-#                     "vlan_id": 10
-#                 }
-#             ],
-#             "running_config": null,
-#             "state": "merged"
-#         }
-#     }
-# }
+- name: Keep only rad1 (every other RADIUS server is removed)
+  ale.aos8.aos8_radius_servers:
+    config:
+      - name: rad1
+        host: 192.168.121.251
+        key: Secret123
+        timeout: 5
+    state: overridden
 
-# Using overridden
-#
-# Before state:
-# -------------
-#
-# ACSW01-> show vlan 1 members
-#    port      type        status
-# ----------+-----------+---------------
-#   1/1/26     untagged     forwarding
-#   1/1/27     untagged     forwarding
-#   1/1/28     untagged     forwarding
+# Commands sent to the switch
+# ---------------------------
+# no aaa radius-server "rad2"
 
----
-- hosts: all
-  gather_facts: true
-  ignore_errors: true
-  name: L2 Interface overridden with flash_synchro (true)
-  vars:
-    ansible_aos_flash_synchro_flag : true
-  tasks:
-    - name: Run L2 interfaces resource module with state overridden
-      ale.aos8.aos8_l2_interfaces:
-        config:
-          - vlan_id: 1
-            port_type: port
-            port_number: 1/1/26
-            mode: untagged
-          - vlan_id: 10
-            port_type: port
-            port_number: 1/1/27
-            mode: untagged
-          - vlan_id: 1
-            port_type: port
-            port_number: 1/1/28
-            mode: untagged                        
-        state: overridden
+- name: Show the commands for a server without connecting to the switch
+  ale.aos8.aos8_radius_servers:
+    config:
+      - name: rad9
+        host: 10.0.0.9
+        key: Secret123
+    state: rendered
 
-# After state:
-# ------------
-# 
-# ACSW01-> show vlan 10 members
-#    port      type        status
-# ----------+-----------+---------------
-#   1/1/27     untagged      forwarding  
+# Value returned as rendered
+# --------------------------
+# - aaa radius-server "rad9" host 10.0.0.9 key ******** retransmit 3 timeout 2 auth-port 1812 acct-port 1813
 
-# results : {
-#     "after": [
-#         {
-#             "mode": "untagged",
-#             "port_number": "1/1/28",
-#             "port_type": "port",
-#             "vlan_id": 1
-#         },
-#         {
-#             "mode": "untagged",
-#             "port_number": "1/1/27,
-#             "port_type": "port",
-#             "vlan_id": 10
-#         },
-#         {
-#             "mode": "untagged",
-#             "port_number": "1/1/26",
-#             "port_type": "port",
-#             "vlan_id": 1
-#         },
-#     ],
-#     "changed": true,
-#     "commands": [
-#         "vlan 10 members port 1/1/27 untagged"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#                 {
-#                     "mode": "untagged",
-#                     "port_number": "1/1/27",
-#                     "port_type": "port",
-#                     "vlan_id": 10
-#                 }
-#             ],
-#             "running_config": null,
-#             "state": "overridden"
-#         }
-#     }
-# }
- 
-# Using deleted
-#
-# Before state:
-# -------------
-#
-# ACSW01-> show vlan 10 members
-#    port      type        status
-# ----------+-----------+---------------
-#   1/1/27     untagged     forwarding
+- name: Convert configuration lines into structured data
+  ale.aos8.aos8_radius_servers:
+    running_config: |
+      aaa radius-server "rad1" host 192.168.121.251 hash-key "25EA0FBE" hash-salt "7AA7D7FE" retransmit 3 timeout 2 auth-port 1812 acct-port 1813 vrf-name default
+    state: parsed
 
----
-- hosts: all
-  gather_facts: true
-  ignore_errors: true
-  name: L2 Interface deleted with flash_synchro (true)
-  vars:
-    ansible_aos_flash_synchro_flag : false
-  tasks:
-    - name: Run L2 interfaces resource module with state deleted
-      ale.aos8.aos8_l2_interfaces:
-        config:
-          - vlan_id: 10
-            mode: tagged
-            port_number: 1/1/27
-            port_type: port
-        state: deleted
+# Value returned as parsed
+# ------------------------
+# - name: rad1
+#   host: 192.168.121.251
+#   retransmit: 3
+#   timeout: 2
+#   auth_port: 1812
+#   acct_port: 1813
+#   vrf: default
 
-# After state:
-# -------------
-# ACSW01-> show vlan 1 members
-#    port      type        status
-# ----------+-----------+---------------
-#   1/1/26     untagged     forwarding
-#   1/1/27     untagged     forwarding
-#   1/1/28     untagged     forwarding   
+- name: Remove a server
+  ale.aos8.aos8_radius_servers:
+    config:
+      - name: rad1
+    state: deleted
 
-# results: {
-#     "after": [
-#         {
-#             "mode": "untagged",
-#             "port_number": "1/1/28",
-#             "port_type": "port",
-#             "vlan_id": 1
-#         },
-#         {
-#             "mode": "untagged",
-#             "port_number": "1/1/27,
-#             "port_type": "port",
-#             "vlan_id": 1
-#         },
-#         {
-#             "mode": "untagged",
-#             "port_number": "1/1/26",
-#             "port_type": "port",
-#             "vlan_id": 1
-#         },
-#     ],
-#     "changed": true,
-#     "commands": [
-#         "no vlan 10 members port 1/1/27"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#                 {
-#                     "mode": "untagged",
-#                     "port_number": "1/1/27",
-#                     "port_type": "port",
-#                     "vlan_id": 10
-#                 }
-#             ],
-#             "running_config": null,
-#             "state": "deleted"
-#         }
-#     }
-# }
+# Commands sent to the switch
+# ---------------------------
+# no aaa radius-server "rad1"
 
-# Using Rendered
-#
-# Before state:
-# -------------
-#
-# ACSW01-> show vlan 1 members
-#    port      type        status
-# ----------+-----------+---------------
-#   1/1/26     untagged     forwarding
-#   1/1/27     untagged     forwarding
-#   1/1/28     untagged     forwarding
-#
----
-- hosts: all
-  gather_facts: true
-  ignore_errors: true
-  name: L2 Interface rendered 
-  vars:
-    ansible_aos_flash_synchro_flag : true
-  tasks:
-    - name: Run L2 interfaces resource module with state rendered
-      ale.aos8.aos8_l2_interfaces:
-        config:
-          - vlan_id: 10
-            port_type: port
-            port_number: 1/1/27
-            mode: untagged  
-        state: rendered
+- name: Reach the RADIUS server through another VRF (no other server is configured)
+  ale.aos8.aos8_radius_servers:
+    config:
+      - name: rad4
+        host: 192.168.121.254
+        key: Secret123
+        vrf: vrf-val
+    state: merged
 
-# results: {
-#     "after": [
-#     ],
-#     "changed": false,
-#     "commands": [
-#         "vlan 10 members port 1/1/27 untagged"
-#     ],
-#     "invocation": {
-#         "module_args": {
-#             "config": [
-#                 {
-#                     "mode": "untagged",
-#                     "port_number": "1/1/27",
-#                     "port_type": "port",
-#                     "vlan_id": 10
-#                 }
-#             ],
-#             "running_config": null,
-#             "state": "deleted"
-#         }
-#     }
-# }
+# Commands sent to the switch
+# ---------------------------
+# aaa radius-server "rad4" host 192.168.121.254 key ******** retransmit 3 timeout 2 auth-port 1812 acct-port 1813 vrf-name vrf-val
 
+- name: Remove every RADIUS server
+  ale.aos8.aos8_radius_servers:
+    state: deleted
+
+# Commands sent to the switch
+# ---------------------------
+# no aaa radius-server "rad4"
 """
 
-RETURN = """
+RETURN = r"""
+---
 before:
-  description: The configuration as structured data prior to module invocation.
-  returned: always
+  description: The configuration found on the switch before the module ran.
+  returned: when O(state) is C(merged) or C(replaced) or C(overridden) or C(deleted)
   type: list
-  sample: >
-    The configuration returned will always be in the same format
-     of the parameters above.
+  elements: dict
+  sample: The configuration in the format of the O(config) option.
 after:
-  description: The configuration as structured data after module completion.
-  returned: when changed
+  description: The configuration found on the switch after the module ran.
+  returned: when the module changed the switch
   type: list
-  sample: >
-    The configuration returned will always be in the same format
-     of the parameters above.
+  elements: dict
+  sample: The configuration in the format of the O(config) option.
 commands:
-  description: The set of commands pushed to the remote device.
-  returned: always
+  description: The commands sent to the switch. In check mode, the commands that would be sent.
+  returned: when O(state) is C(merged) or C(replaced) or C(overridden) or C(deleted)
   type: list
-  sample: ['vlan 10 member 1/1/1 untagged', 'vlan 10 member 1/1/1 tagged']
+  elements: str
+  sample:
+    - aaa radius-server "rad1" host 192.168.121.251 key ******** retransmit 3 timeout 2 auth-port 1812
+      acct-port 1813
+    - aaa radius-server "rad2" host 192.168.121.252 key ******** retransmit 5 timeout 10 auth-port 1645
+      acct-port 1646
+gathered:
+  description: The configuration read from the switch.
+  returned: when O(state) is C(gathered)
+  type: list
+  elements: dict
+  sample: The configuration in the format of the O(config) option.
+parsed:
+  description: The structured data built from O(running_config).
+  returned: when O(state) is C(parsed)
+  type: list
+  elements: dict
+  sample:
+    - name: rad1
+      host: 192.168.121.251
+      retransmit: 3
+      timeout: 2
+      auth_port: 1812
+      acct_port: 1813
+      vrf: default
+rendered:
+  description: The commands for the given configuration.
+  returned: when O(state) is C(rendered)
+  type: list
+  elements: str
+  sample:
+    - aaa radius-server "rad9" host 10.0.0.9 key ******** retransmit 3 timeout 2 auth-port 1812 acct-port
+      1813
 """
+
 from ansible.module_utils.basic import AnsibleModule
 
 from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.radius_servers.radius_servers import (
     Radius_serversArgs,
 )
-from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.radius_servers.radius_servers import Radius_servers
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.config.radius_servers.radius_servers import (
+    Radius_servers,
+)
 
 
 def main():
@@ -440,24 +304,22 @@ def main():
 
     :returns: the result form module invocation
     """
-    required_if = [
-        ("state", "merged", ("config",)),
-        ("state", "replaced", ("config",)),
-        ("state", "overridden", ("config",)),
-        ("state", "rendered", ("config",)),           
-        ("state", "parsed", ("running_config",)),     ### TODO: yet to be implemented
-    ]
-    mutually_exclusive = [("config", "running_config")]
-
     module = AnsibleModule(
         argument_spec=Radius_serversArgs.argument_spec,
-        required_if=required_if,
-        mutually_exclusive=mutually_exclusive,
+        mutually_exclusive=[["config", "running_config"]],
+        required_if=[
+            ["state", "merged", ["config"]],
+            ["state", "replaced", ["config"]],
+            ["state", "overridden", ["config"]],
+            ["state", "rendered", ["config"]],
+            ["state", "parsed", ["running_config"]],
+        ],
         supports_check_mode=True,
     )
 
     result = Radius_servers(module).execute_module()
     module.exit_json(**result)
+
 
 if __name__ == "__main__":
     main()

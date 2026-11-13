@@ -1,0 +1,253 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+    - vlan 30 admin-state enable
+    - vlan 31 admin-state enable
+    - linkagg static agg 5 size 2
+    - no vlan 30 members port 1/1/5
+    - no vlan 31 members port 1/1/5
+    - no vlan 31 members port 1/1/6
+    - no vlan 30 members linkagg 5
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Add a port and a link aggregate to VLANs
+      ale.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 30
+            port_type: port
+            port_number: 1/1/5
+            mode: untagged
+          - vlan_id: 31
+            port_number: 1/1/5
+            mode: tagged
+          - vlan_id: 30
+            port_type: linkagg
+            port_number: '5'
+            mode: tagged
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 30 members port 1/1/5 untagged', 'vlan 31 members port 1/1/5 tagged', 'vlan 30 members linkagg 5 tagged']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Add a port and a link aggregate to VLANs (run again: nothing changes)'
+      ale.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 30
+            port_type: port
+            port_number: 1/1/5
+            mode: untagged
+          - vlan_id: 31
+            port_number: 1/1/5
+            mode: tagged
+          - vlan_id: 30
+            port_type: linkagg
+            port_number: '5'
+            mode: tagged
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Change link aggregate 5 from tagged to untagged in VLAN 30
+      ale.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 30
+            port_number: '5'
+            mode: untagged
+        state: merged
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no vlan 30 members linkagg 5', 'vlan 30 members linkagg 5 untagged']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Change link aggregate 5 from tagged to untagged in VLAN 30 (run again: nothing changes)'
+      ale.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 30
+            port_number: '5'
+            mode: untagged
+        state: merged
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Make port 1/1/6 a tagged member of VLAN 31
+      ale.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 31
+            port_number: 1/1/6
+            mode: tagged
+        state: replaced
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 31 members port 1/1/6 tagged']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Make port 1/1/6 a tagged member of VLAN 31 (run again: nothing changes)'
+      ale.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 31
+            port_number: 1/1/6
+            mode: tagged
+        state: replaced
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Read the VLAN memberships from the switch
+      ale.aos8.aos8_l2_interfaces:
+        state: gathered
+      register: result
+    - name: Check the gathered data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - '{''vlan_id'': 30, ''port_number'': ''1/1/5'', ''port_type'': ''port'', ''mode'': ''untagged''} in result.gathered'
+          - '{''vlan_id'': 30, ''port_number'': ''5'', ''port_type'': ''linkagg'', ''mode'': ''untagged''} in result.gathered'
+        fail_msg: '{{ result | to_json }}'
+    - name: Keep only these memberships (every other one is removed, except untagged VLAN 1)
+      ale.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 10
+            port_number: 1/1/1
+            mode: tagged
+          - vlan_id: 30
+            port_number: 1/1/5
+            mode: untagged
+        state: overridden
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - '''no vlan 31 members port 1/1/5'' in result.commands'
+          - '''no vlan 31 members port 1/1/6'' in result.commands'
+          - '''no vlan 30 members linkagg 5'' in result.commands'
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Keep only these memberships (every other one is removed, except untagged VLAN 1) (run again: nothing changes)'
+      ale.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 10
+            port_number: 1/1/1
+            mode: tagged
+          - vlan_id: 30
+            port_number: 1/1/5
+            mode: untagged
+        state: overridden
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Show the commands for a membership without connecting to the switch
+      ale.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 30
+            port_number: 1/1/7
+            mode: untagged
+        state: rendered
+      register: result
+    - name: Check the rendered commands
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.rendered == ['vlan 30 members port 1/1/7 untagged']
+        fail_msg: '{{ result | to_json }}'
+    - name: Convert the output of show vlan members into structured data
+      ale.aos8.aos8_l2_interfaces:
+        running_config: |
+          vlan       port         type         status
+          --------+------------+------------+--------------
+            1         1/1/1        untagged   forwarding
+            99        0/5          tagged     inactive
+        state: parsed
+      register: result
+    - name: Check the parsed data
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - 'result.parsed == [{''vlan_id'': 1, ''port_number'': ''1/1/1'', ''port_type'': ''port'', ''mode'': ''untagged''}, {''vlan_id'': 99, ''port_number'': ''5'', ''port_type'': ''linkagg'', ''mode'':
+            ''tagged''}]'
+        fail_msg: '{{ result | to_json }}'
+    - name: Remove port 1/1/5 from VLAN 30
+      ale.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 30
+            port_number: 1/1/5
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['no vlan 30 members port 1/1/5']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove port 1/1/5 from VLAN 30 (run again: nothing changes)'
+      ale.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 30
+            port_number: 1/1/5
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+    - name: Remove every membership except untagged VLAN 1
+      ale.aos8.aos8_l2_interfaces:
+        state: deleted
+      register: result
+    - name: Check the commands sent
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - '''no vlan 10 members port 1/1/1'' in result.commands'
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Remove every membership except untagged VLAN 1 (run again: nothing changes)'
+      ale.aos8.aos8_l2_interfaces:
+        state: deleted
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - result.commands == []
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+        - no vlan 30
+        - no vlan 31
+        - no linkagg static agg 5
+        - vlan 10 members port 1/1/1 tagged
+      changed_when: false
+      failed_when: false

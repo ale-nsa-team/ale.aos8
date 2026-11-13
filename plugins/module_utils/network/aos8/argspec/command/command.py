@@ -19,5 +19,4 @@ class CommandArgs(object):  # pylint: disable=R0903
 
     argument_spec = {
         "commands": {"required": True, "type": "list", "elements": "raw"},
-        "output": {"aliases": ["output"], "type": "list", "elements": "str"},
     }  # pylint: disable=C0301

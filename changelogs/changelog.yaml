@@ -1,0 +1,15 @@
+---
+ancestor: null
+releases:
+  1.0.0:
+    release_date: "2024-11-01"
+  1.0.1:
+    changes:
+      bugfixes:
+        - radius_servers - Close the unbalanced ``host`` named capture group in the radius-server fact parser.
+    release_date: "2026-05-29"
+  1.0.2:
+    changes:
+      bugfixes:
+        - collection - Add ``meta/runtime.yml`` with action plugin routing and action groups.
+    release_date: "2026-05-29"

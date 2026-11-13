@@ -1,0 +1,7 @@
+vlan    type   admin   oper    ip    mtu          name
+------+-------+-------+------+------+------+------------------
+1      std       Ena     Ena   Dis    1500    VLAN 1                          
+10     std       Ena     Ena   Ena    1500    VAL-ISL                         
+20     std       Ena     Ena   Ena    1500    VAL-CLIENT                      
+99     std       Ena     Ena   Ena    1280    VAL 99 with spaces              
+4094   vcm       Ena     Dis   Dis    1500    VCM IPC

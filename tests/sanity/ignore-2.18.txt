@@ -1,0 +1,1 @@
+plugins/action/aos8.py action-plugin-docs # base class for the modules of this collection, it has no documentation of its own

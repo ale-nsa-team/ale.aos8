@@ -1,84 +1,65 @@
 # -*- coding: utf-8 -*-
-# Copyright 2020 Red Hat
-# GNU General Public License v3.0+
-# (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# Copyright (c) Alcatel-Lucent Enterprise
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 
 __metaclass__ = type
 
 """
 The aos8 bgp fact class
-It is in this file the configuration is collected from the device
-for a given resource, parsed, and the facts tree is populated
-based on the configuration.
 """
 
-from ansible.module_utils.six import iteritems
-from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
+import re
 
-from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.bgp.bgp import Bgp_Args
-from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.rm_templates.Bgp_Template import Bgp_Template
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.argspec.bgp.bgp import (
+    Bgp_Args,
+)
+from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.facts.base import Aos8FactsBase
 
 
-class Bgp_Facts(object):
-    """The aos8 bgp facts class"""
+class Bgp_Facts(Aos8FactsBase):
+    """Reads the BGP configuration of the default VRF from the configuration snapshot"""
 
-    def __init__(self, module, subspec="config", options="options"):
-        self._module = module
-        self.argument_spec = Bgp_Args.argument_spec
+    RESOURCE = "bgp"
+    ARGSPEC = Bgp_Args
+    COMMAND = "show configuration snapshot bgp"
 
-    def get_config(self, connection):
-        """Wrapper method for `connection.get()`
-        This method exists solely to allow the unit test framework to mock device connection calls.
-        """
-        return connection.get("show configuration snapshot bgp ")
+    NEIGHBOR = re.compile(r"^ip\s+bgp\s+neighbor\s+(?P<address>\S+)(?P<options>.*)$")
 
-    def populate_facts(self, connection, ansible_facts, data=None):
-        """Populate the facts for Bgp network resource
-
-        :param connection: the device connection
-        :param ansible_facts: Facts dictionary
-        :param data: previously collected conf
-
-        :rtype: dictionary
-        :returns: facts
-        """
-        facts = {}
-        objs = []
-        if not data:
-            data = self.get_config(connection)
-
-        bgp_config = []
-        for bgp_line in data.splitlines():
-            bgp_config.append(bgp_line)
-
-        # parse native config using the Bgp template
-        bgp_parser = Bgp_Template(
-            lines=bgp_config,
-            module=self._module,
-        )
-        objs = bgp_parser.parse()
-
-        if objs:
-            global_vals = objs.pop("global", {})
-            for key, value in iteritems(global_vals):
-                objs[key] = value
-
-            if "neighbor" in objs:
-                objs["neighbor"] = list(objs["neighbor"].values())
-
-        ansible_facts["ansible_network_resources"].pop("bgp", None)
-
-        params = utils.remove_empties(
-            bgp_parser.validate_config(
-                self.argument_spec,
-                {"config": objs},
-                redact=True,
-            ),
-        )
-
-        facts["bgp"] = params.get("config", [])
-        ansible_facts["ansible_network_resources"].update(facts)
-
-        return ansible_facts
+    def parse(self, data):
+        loaded = False
+        config = {"bgp_admin_state": "disable"}
+        neighbors = {}
+        for line in data.splitlines():
+            line = line.strip()
+            if line.startswith("vrf "):
+                break
+            if line == "ip load bgp":
+                loaded = True
+                continue
+            match = re.match(r"^ip\s+bgp\s+autonomous-system\s+(\S+)", line)
+            if match:
+                config["as_number"] = match.group(1)
+                continue
+            match = re.match(r"^ip\s+bgp\s+admin-state\s+(enable|disable)", line)
+            if match:
+                config["bgp_admin_state"] = match.group(1)
+                continue
+            match = self.NEIGHBOR.match(line)
+            if match:
+                entry = neighbors.setdefault(
+                    match.group("address"),
+                    {"neighbor_address": match.group("address"), "neighbor_admin_state": "disable"},
+                )
+                options = match.group("options").split()
+                if "remote-as" in options[:-1]:
+                    entry["remote_as"] = options[options.index("remote-as") + 1]
+                if "admin-state" in options[:-1]:
+                    entry["neighbor_admin_state"] = options[options.index("admin-state") + 1]
+        if not loaded:
+            return {}
+        if neighbors:
+            config["neighbor"] = list(neighbors.values())
+        return config

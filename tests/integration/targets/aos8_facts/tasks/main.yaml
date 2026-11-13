@@ -1,0 +1,205 @@
+---
+# Generated from the module examples: every documented example runs here.
+- name: Prepare the switch
+  ansible.netcommon.cli_command:
+    command: '{{ item }}'
+  loop:
+    - vrf default
+  changed_when: false
+  failed_when: false
+- name: Run the test cases and always restore the switch
+  block:
+    - name: Collect the basic facts
+      ale.aos8.aos8_facts:
+        gather_subset: min
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_net_version is match('8\\.\\d+\\.\\d+\\.R\\d+')
+          - result.ansible_facts.ansible_net_model | length > 0
+          - result.ansible_facts.ansible_net_hostname == 'val-os1'
+          - '''Alcatel-Lucent Enterprise'' in result.ansible_facts.ansible_net_system'
+          - result.ansible_facts.ansible_net_network_os == 'aos8'
+          - result.ansible_facts.ansible_network_resources == {}
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect the VLANs and the system name, without basic facts
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - vlans
+          - hostname
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - 'result.ansible_facts.ansible_network_resources.hostname == {''hostname'': ''val-os1''}'
+          - result.ansible_facts.ansible_network_resources.vlans | selectattr('vlan_id', 'equalto', 10) | list | length == 1
+          - '''ansible_net_version'' not in result.ansible_facts'
+          - result.ansible_facts.ansible_network_resources | length == 2
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect the basic facts and every resource
+      ale.aos8.aos8_facts:
+        gather_subset: all
+        gather_network_resources: all
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | sort == ['bgp', 'hostname', 'l2_interfaces', 'l3_interfaces', 'ntp', 'ospfv2', 'radius_servers', 'static_routes', 'switch_security', 'trap_managers',
+            'vlans']
+          - result.ansible_facts.ansible_net_version | length > 0
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect only the bgp resource
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - bgp
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | list == ['bgp']
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect only the hostname resource
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - hostname
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | list == ['hostname']
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect only the l2_interfaces resource
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - l2_interfaces
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | list == ['l2_interfaces']
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect only the l3_interfaces resource
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - l3_interfaces
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | list == ['l3_interfaces']
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect only the ntp resource
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - ntp
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | list == ['ntp']
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect only the ospfv2 resource
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - ospfv2
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | list == ['ospfv2']
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect only the radius_servers resource
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - radius_servers
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | list == ['radius_servers']
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect only the static_routes resource
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - static_routes
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | list == ['static_routes']
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect only the switch_security resource
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - switch_security
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | list == ['switch_security']
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect only the trap_managers resource
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - trap_managers
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | list == ['trap_managers']
+        fail_msg: '{{ result | to_json }}'
+    - name: Collect only the vlans resource
+      ale.aos8.aos8_facts:
+        gather_subset:
+          - '!all'
+          - '!min'
+        gather_network_resources:
+          - vlans
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result.ansible_facts.ansible_network_resources.keys() | list == ['vlans']
+        fail_msg: '{{ result | to_json }}'
+  always:
+    - name: Restore the switch
+      ansible.netcommon.cli_command:
+        command: '{{ item }}'
+      loop:
+        - vrf default
+      changed_when: false
+      failed_when: false
