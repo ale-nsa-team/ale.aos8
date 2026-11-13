@@ -28,6 +28,7 @@ from ansible_collections.ansible.netcommon.plugins.plugin_utils.terminal_base im
 
 display = Display()
 
+
 class TerminalModule(TerminalBase):
     terminal_stdout_re = [re.compile(rb"[\r\n]?[\w\+\-\.:\/\[\]]+(?:\([^\)]+\)){0,3}(?:[>#]) ?$")]
 
@@ -40,7 +41,6 @@ class TerminalModule(TerminalBase):
     ]
 
     terminal_config_prompt = re.compile(r"^.+[>#\$]$")
-
 
     def on_open_shell(self):
         prompt = self._get_prompt()

@@ -165,7 +165,7 @@ Examples
     - name: Convert configuration lines into structured data
       ale.aos8.aos8_radius_servers:
         running_config: |
-          aaa radius-server "rad1" host 192.168.121.251 hash-key "25EA0FBE" hash-salt "7AA7D7FE" retransmit 3 timeout 2 auth-port 1812 acct-port 1813 vrf-name default
+          aaa radius-server "rad1" host 192.168.121.251 hash-key "25EA0FBE" retransmit 3 timeout 2 auth-port 1812 acct-port 1813 vrf-name default
         state: parsed
 
     # Value returned as parsed

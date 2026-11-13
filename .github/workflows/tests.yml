@@ -44,6 +44,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz
+      # the modules import ansible.netcommon: install it next to the collection
+      - run: ansible-galaxy collection install ansible.netcommon -p .
       - run: ansible-test sanity --docker default -v --color
         working-directory: ${{ env.COLLECTION_PATH }}
 

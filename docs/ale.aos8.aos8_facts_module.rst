@@ -32,7 +32,7 @@ Parameters
    * - ``gather_network_resources``
      - list / elements=str
      - ``all``, ``bgp``, ``hostname``, ``l2_interfaces``, ``l3_interfaces``, ``ntp``, ``ospfv2``, ``radius_servers``, ``static_routes``, ``switch_security``, ``trap_managers``, ``vlans``
-     - Selects the resources whose configuration is collected. ``all`` collects every resource. Each other value has the format of the ``config`` option of the resource module with the same name. No resource is collected when this option is left out.
+     - Selects the resources whose configuration is collected. ``all`` collects every resource. The data of each resource has the format of the ``config`` option of the resource module with the same name. No resource is collected when this option is left out.
    * - ``gather_subset``
      - list / elements=str
      - Default: ``["min"]``

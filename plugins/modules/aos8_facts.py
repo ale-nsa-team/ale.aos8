@@ -41,8 +41,8 @@ options:
   gather_network_resources:
     description:
       - Selects the resources whose configuration is collected.
-      - V(all) collects every resource. Each other value has the format of the O(config) option of the
-        resource module with the same name.
+      - V(all) collects every resource. The data of each resource has the format of the C(config) option
+        of the resource module with the same name.
       - No resource is collected when this option is left out.
     type: list
     elements: str

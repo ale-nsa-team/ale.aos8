@@ -7,7 +7,7 @@
 # Expected state of the switch before the run (see tests/integration/README.md):
 # system name val-os1, VLAN 10 "VAL-ISL" with port 1/1/1 tagged,
 # IP interface int_10 10.10.10.1/24 on VLAN 10, local authentication.
-- name: ale.aos8 lab tests
+- name: Run the ale.aos8 lab tests
   hosts: all
   gather_facts: false
   vars:
