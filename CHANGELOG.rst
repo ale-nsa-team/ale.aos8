@@ -4,6 +4,21 @@ ALE AOS8 Collection Release Notes
 
 .. contents:: Topics
 
+v1.1.1
+======
+
+Release Summary
+---------------
+
+This patch release restores the behaviour of ``ansible_aos_flash_synchro_flag``.
+
+Bugfixes
+--------
+
+- cliconf - ``ansible_aos_flash_synchro_flag`` now runs ``copy running certified
+  flash-synchro``, the full form of the ``copy flash-synchro`` command used in
+  1.0.2. In 1.1.0 it ran ``copy running certified`` without ``flash-synchro``.
+
 v1.1.0
 ======
 

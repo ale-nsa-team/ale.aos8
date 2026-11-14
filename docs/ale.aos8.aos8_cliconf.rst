@@ -31,7 +31,7 @@ Parameters
    * - ``flash_synchro_flag``
      - boolean
      - Default: ``false``
-     - Certifies the configuration after it is saved, with ``copy running certified``. The switch then boots with this configuration from the certified directory as well. Only used when ``write_memory_flag`` is enabled, so that the saved configuration is the one that gets certified. The command can take up to two minutes, so ``ansible_command_timeout`` must be 120 seconds or more when this option is enabled.
+     - Runs ``copy running certified flash-synchro`` after each change, to copy the running directory to the certified directory and synchronize them. ``ansible_command_timeout`` must be 60 seconds or more when this option is enabled.
    * - ``write_memory_flag``
      - boolean
      - Default: ``true``
@@ -67,15 +67,15 @@ Examples
       vars:
         ansible_aos_write_memory_flash: false
 
-    - name: Change the system name, save it and certify it
+    - name: Change the system name, save it and synchronize the certified directory
       ale.aos8.aos8_hostname:
         config:
-          hostname: val-os1-certified
+          hostname: val-os1-synchro
         state: merged
       vars:
         ansible_aos_write_memory_flash: true
         ansible_aos_flash_synchro_flag: true
-        ansible_command_timeout: 180
+        ansible_command_timeout: 90
 
 Authors
 -------
