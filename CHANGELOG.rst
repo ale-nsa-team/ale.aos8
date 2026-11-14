@@ -89,6 +89,12 @@ Bugfixes
   output.
 - All resource modules - the ``parsed`` state now returns the parsed data.
 - Removed the broken ``hostname`` action plugin.
+- Fix the ``SyntaxWarning: invalid escape sequence`` raised by Python 3.12 in
+  the fact parsers (https://github.com/ale-nsa-team/ale.aos8/pull/6).
+  Thanks to lukeod.
+- Fix the ansible-core deprecation warnings about ``ansible.module_utils._text``,
+  ``_collections_compat`` and ``warnings`` in ``exit_json``
+  (https://github.com/ale-nsa-team/ale.aos8/issues/7). Thanks to mksbv for the report.
 
 v1.0.2
 ======
