@@ -36,12 +36,9 @@ options:
     type: boolean
     default: false
     description:
-      - Certifies the configuration after it is saved, with C(copy running certified). The switch
-        then boots with this configuration from the certified directory as well.
-      - Only used when O(write_memory_flag) is enabled, so that the saved configuration is the one
-        that gets certified.
-      - The command can take up to two minutes, so C(ansible_command_timeout) must be 120 seconds
-        or more when this option is enabled.
+      - Runs C(copy running certified flash-synchro) after each change, to copy the running
+        directory to the certified directory and synchronize them.
+      - C(ansible_command_timeout) must be 60 seconds or more when this option is enabled.
     env:
       - name: ANSIBLE_AOS_FLASH_SYNCHRO_FLAG
     vars:
@@ -74,20 +71,19 @@ EXAMPLES = """
   vars:
     ansible_aos_write_memory_flash: false
 
-- name: Change the system name, save it and certify it
+- name: Change the system name, save it and synchronize the certified directory
   ale.aos8.aos8_hostname:
     config:
-      hostname: val-os1-certified
+      hostname: val-os1-synchro
     state: merged
   vars:
     ansible_aos_write_memory_flash: true
     ansible_aos_flash_synchro_flag: true
-    ansible_command_timeout: 180
+    ansible_command_timeout: 90
 """
 
 import json
 import re
-import time
 
 from collections.abc import Mapping
 
@@ -202,10 +198,11 @@ class Cliconf(CliconfBase):
                 results.append(self.send_command(**line))
                 requests.append(cmd)
 
-        if commit and self.get_option("write_memory_flag"):
-            self.write_memory()
+        if commit:
+            if self.get_option("write_memory_flag"):
+                self.write_memory()
             if self.get_option("flash_synchro_flag"):
-                self.certify()
+                self.flash_synchro()
 
         resp["request"] = requests
         resp["response"] = results
@@ -261,25 +258,14 @@ class Cliconf(CliconfBase):
             raise ValueError("The configuration was not saved to flash")
         return True
 
-    def certify(self, wait=120, interval=5):
-        """Copies the running directory to the certified directory.
-
-        The copy runs in the background on the switch and can take up to two
-        minutes, so the status is read again until it is CERTIFIED.
-        """
-        self._check_timeout(120)
-        self.get(command="copy running certified")
-        waited = 0
-        while True:
-            data = to_text(self.get(command="show running-directory"), errors="surrogate_or_strict")
-            if not re.search(r"CERTIFY NEEDED", data):
-                return True
-            if waited >= wait:
-                raise ValueError(
-                    "The configuration was not copied to the certified directory after %s seconds" % wait,
-                )
-            time.sleep(interval)
-            waited += interval
+    def flash_synchro(self):
+        """Copies the running directory to the certified directory and synchronizes them."""
+        self._check_timeout(60)
+        self.get(command="copy running certified flash-synchro")
+        data = to_text(self.get(command="show running-directory"), errors="surrogate_or_strict")
+        if re.search(r"CERTIFY NEEDED", data):
+            raise ValueError("Certified directory not synchronized")
+        return True
 
     # Return the basic information about the device.  Model / Version and Up time
     def get_device_info(self):

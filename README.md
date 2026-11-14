@@ -93,9 +93,9 @@ After each change, the collection saves the configuration to flash with `write m
 Variable | Default | Effect
 --- | --- | ---
 `ansible_aos_write_memory_flash` | `true` | Saves the configuration to flash after each change.
-`ansible_aos_flash_synchro_flag` | `false` | After saving, certifies the configuration with `copy running certified`.
+`ansible_aos_flash_synchro_flag` | `false` | Runs `copy running certified flash-synchro` after each change.
 
-Saving needs `ansible_command_timeout` to be 60 seconds or more, certifying 120 seconds or more. Set `ansible_aos_write_memory_flash: false` to keep changes in the running configuration only.
+Both need `ansible_command_timeout` to be 60 seconds or more. Set `ansible_aos_write_memory_flash: false` to keep changes in the running configuration only.
 
 The switch must run from the working directory. Changes are refused when it runs from the certified directory.
 

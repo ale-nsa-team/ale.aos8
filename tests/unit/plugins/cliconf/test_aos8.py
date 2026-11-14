@@ -23,12 +23,12 @@ SYNCHRONIZATION STATUS
 """
 
 
-def make(write_memory=True, certify=False, directory=WORKING, timeout=180):
+def make(write_memory=True, flash_synchro=False, directory=WORKING, timeout=180):
     cliconf = Cliconf.__new__(Cliconf)
     cliconf._device_info = {}
     cliconf._connection = MagicMock()
     cliconf._connection.get_option.return_value = timeout
-    options = {"write_memory_flag": write_memory, "flash_synchro_flag": certify}
+    options = {"write_memory_flag": write_memory, "flash_synchro_flag": flash_synchro}
     cliconf.get_option = options.get
     cliconf.sent = []
 
@@ -57,48 +57,33 @@ def test_save_can_be_disabled():
     assert cliconf.sent == ["show running-directory", "vlan 30 admin-state enable"]
 
 
-def test_certify_after_saving():
-    cliconf = make(certify=True)
+def test_flash_synchro_after_saving():
+    cliconf = make(flash_synchro=True)
     cliconf.edit_config(["vlan 30 admin-state enable"])
-    assert cliconf.sent[-3:] == ["show running-directory", "copy running certified", "show running-directory"]
-    assert "copy flash-synchro" not in cliconf.sent
+    assert cliconf.sent[-4:] == [
+        "write memory flash-synchro",
+        "show running-directory",
+        "copy running certified flash-synchro",
+        "show running-directory",
+    ]
 
 
-def test_no_certify_without_saving():
-    cliconf = make(write_memory=False, certify=True)
+def test_flash_synchro_without_saving():
+    cliconf = make(write_memory=False, flash_synchro=True)
     cliconf.edit_config(["vlan 30 admin-state enable"])
-    assert "copy running certified" not in cliconf.sent
+    assert cliconf.sent[-2:] == ["copy running certified flash-synchro", "show running-directory"]
+    assert "write memory flash-synchro" not in cliconf.sent
 
 
-def test_certify_waits_until_the_copy_is_done(monkeypatch):
-    monkeypatch.setattr("time.sleep", lambda seconds: None)
-    # the switch reports CERTIFY NEEDED twice, then CERTIFIED
-    needed = WORKING.replace("CERTIFIED,", "CERTIFY NEEDED,")
-    states = iter([needed, needed])
-    cliconf = make(certify=True)
-    original = cliconf.send_command
-
-    def send_command(command, **kwargs):
-        if command == "show running-directory" and "copy running certified" in cliconf.sent:
-            cliconf.sent.append(command)
-            return next(states, WORKING)
-        return original(command, **kwargs)
-
-    cliconf.send_command = send_command
-    cliconf.edit_config(["vlan 30 admin-state enable"])
-    assert cliconf.sent.count("show running-directory") == 5
-
-
-def test_certify_failure_is_reported(monkeypatch):
-    monkeypatch.setattr("time.sleep", lambda seconds: None)
-    cliconf = make(certify=True, directory=WORKING.replace("CERTIFIED,", "CERTIFY NEEDED,"))
-    with pytest.raises(ValueError, match="certified directory after 120 seconds"):
+def test_flash_synchro_failure_is_reported():
+    cliconf = make(flash_synchro=True, directory=WORKING.replace("CERTIFIED,", "CERTIFY NEEDED,"))
+    with pytest.raises(ValueError, match="Certified directory not synchronized"):
         cliconf.edit_config(["vlan 30 admin-state enable"])
 
 
-def test_certify_needs_a_long_timeout():
-    cliconf = make(certify=True, timeout=90)
-    with pytest.raises(ValueError, match="120 seconds"):
+def test_flash_synchro_needs_a_long_timeout():
+    cliconf = make(flash_synchro=True, timeout=30)
+    with pytest.raises(ValueError, match="60 seconds"):
         cliconf.edit_config(["vlan 30 admin-state enable"])
 
 
