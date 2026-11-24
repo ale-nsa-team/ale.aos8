@@ -53,6 +53,10 @@ Parameters
      - list / elements=str
      -
      - Commands to send before the configuration lines, when at least one line has to be sent.
+   * - ``content``
+     - str
+     -
+     - Configuration lines as one text, already rendered. This is the recommended way to send a Jinja2 template: render it with the ``ansible.builtin.template`` lookup and pass the result to this option, as shown in the examples. Mutually exclusive with ``lines`` and ``src``.
    * - ``diff_against``
      - str
      - ``running`` (default), ``intended``
@@ -84,7 +88,7 @@ Parameters
    * - ``src``
      - str
      -
-     - Path of a file on the Ansible controller that holds the configuration lines. The file can be a Jinja2 template. A relative path is looked up in the ``templates`` folder of the role or next to the playbook. ``ansible.netcommon`` deprecates reading templates through this option. Prefer ``lines`` with the ``ansible.builtin.template`` lookup, as shown in the examples. Mutually exclusive with ``lines``.
+     - Path of a file on the Ansible controller that holds the configuration lines. The file can be a Jinja2 template. A relative path is looked up in the ``templates`` folder of the role or next to the playbook. Mutually exclusive with ``lines`` and ``content``. NOTE: Jinja2 templates given in ``src`` are processed by ``ansible.netcommon``, which deprecates this processing and stops it after January 2028. Render the template with the ``ansible.builtin.template`` lookup and pass the result to ``content`` instead.
 
 Notes
 -----
@@ -151,6 +155,10 @@ Examples
           vlan 43 admin-state enable
           vlan 43 name "Intended"
       diff: true
+
+    - name: Send a Jinja2 template rendered with the template lookup
+      ale.aos8.aos8_config:
+        content: '{{ lookup(''ansible.builtin.template'', ''aos8_config_content.j2'') }}'
 
     - name: Save the configuration when the task changes it
       ale.aos8.aos8_config:

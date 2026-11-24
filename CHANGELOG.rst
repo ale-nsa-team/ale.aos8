@@ -4,6 +4,33 @@ ALE AOS8 Collection Release Notes
 
 .. contents:: Topics
 
+v1.1.2
+======
+
+Release Summary
+---------------
+
+This patch release adds the ``content`` option to ``aos8_config``, the
+recommended way to send a Jinja2 template rendered with the
+``ansible.builtin.template`` lookup.
+
+Minor Changes
+-------------
+
+- aos8_config - Add the ``content`` option for configuration text that is
+  already rendered, for example with
+  ``content: "{{ lookup('ansible.builtin.template', 'config.j2') }}"``
+  (https://github.com/ale-nsa-team/ale.aos8/issues/12). Thanks to mksbv for the
+  report.
+
+Deprecated Features
+-------------------
+
+- aos8_config - Jinja2 templates given in ``src`` are processed by
+  ``ansible.netcommon``, which deprecates this processing and stops it after
+  January 2028. Use ``content`` with the ``ansible.builtin.template`` lookup
+  instead.
+
 v1.1.1
 ======
 

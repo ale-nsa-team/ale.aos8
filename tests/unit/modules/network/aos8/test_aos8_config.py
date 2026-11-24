@@ -104,6 +104,26 @@ class TestAos8ConfigModule(TestAos8Module):
             commands=['vlan 42 name "Cameras"'],
         )
 
+    def test_content(self):
+        # rendered text, for example from the ansible.builtin.template lookup
+        self.run_config(
+            changed=True,
+            content='vlan 10 name "VAL-ISL"\nvlan 42 name "Cameras"\n',
+            commands=['vlan 42 name "Cameras"'],
+        )
+
+    def test_content_idempotent(self):
+        result = self.run_config(content='vlan 10 admin-state enable\nvlan 10 name "VAL-ISL"\n')
+        self.assertNotIn("commands", result)
+
+    def test_content_and_lines_are_mutually_exclusive(self):
+        set_module_args(dict(lines=["vlan 41"], content="vlan 42"))
+        self.execute_module(failed=True)
+
+    def test_content_and_src_are_mutually_exclusive(self):
+        set_module_args(dict(src="vlan 41", content="vlan 42"))
+        self.execute_module(failed=True)
+
     def test_match_none_sends_everything(self):
         self.run_config(
             changed=True,

@@ -44,9 +44,17 @@ options:
       - Path of a file on the Ansible controller that holds the configuration lines. The file can be a
         Jinja2 template.
       - A relative path is looked up in the C(templates) folder of the role or next to the playbook.
-      - C(ansible.netcommon) deprecates reading templates through this option. Prefer O(lines) with the
-        C(ansible.builtin.template) lookup, as shown in the examples.
-      - Mutually exclusive with O(lines).
+      - Mutually exclusive with O(lines) and O(content).
+      - 'NOTE: Jinja2 templates given in O(src) are processed by C(ansible.netcommon), which deprecates
+        this processing and stops it after January 2028. Render the template with the C(ansible.builtin.template)
+        lookup and pass the result to O(content) instead.'
+    type: str
+  content:
+    description:
+      - Configuration lines as one text, already rendered.
+      - 'This is the recommended way to send a Jinja2 template: render it with the C(ansible.builtin.template)
+        lookup and pass the result to this option, as shown in the examples.'
+      - Mutually exclusive with O(lines) and O(src).
     type: str
   before:
     description:
@@ -182,6 +190,10 @@ EXAMPLES = r"""
       vlan 43 name "Intended"
   diff: true
 
+- name: Send a Jinja2 template rendered with the template lookup
+  ale.aos8.aos8_config:
+    content: '{{ lookup(''ansible.builtin.template'', ''aos8_config_content.j2'') }}'
+
 - name: Save the configuration when the task changes it
   ale.aos8.aos8_config:
     lines:
@@ -254,6 +266,8 @@ from ansible_collections.ale.aos8.plugins.module_utils.network.aos8.aos8 import 
 def get_candidate(module):
     if module.params["src"]:
         return module.params["src"]
+    if module.params["content"]:
+        return module.params["content"]
     candidate_obj = NetworkConfig(indent=3)
     candidate_obj.add(module.params["lines"])
     return dumps(candidate_obj, "raw")
@@ -280,6 +294,7 @@ def main():
     argument_spec = dict(
         lines=dict(aliases=["commands"], type="list", elements="str"),
         src=dict(type="str"),
+        content=dict(type="str"),
         before=dict(type="list", elements="str"),
         after=dict(type="list", elements="str"),
         match=dict(type="str", default="line", choices=["line", "none"]),
@@ -298,7 +313,7 @@ def main():
 
     module = AnsibleModule(
         argument_spec=argument_spec,
-        mutually_exclusive=[("lines", "src")],
+        mutually_exclusive=[("lines", "src", "content")],
         required_if=[("diff_against", "intended", ["intended_config"])],
         supports_check_mode=True,
     )
@@ -313,7 +328,7 @@ def main():
         if module.params["backup"]:
             result["__backup__"] = before_config
 
-    if module.params["src"] or module.params["lines"]:
+    if module.params["src"] or module.params["lines"] or module.params["content"]:
         running = module.params["running_config"] or before_config or get_config(module)
         try:
             response = connection.get_diff(
