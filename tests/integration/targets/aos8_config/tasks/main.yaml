@@ -131,6 +131,25 @@
           - result is not changed
           - result.diff is defined
         fail_msg: '{{ result | to_json }}'
+    - name: Send a Jinja2 template rendered with the template lookup
+      ale.aos8.aos8_config:
+        content: '{{ lookup(''ansible.builtin.template'', ''aos8_config_content.j2'') }}'
+      register: result
+    - name: Check the result
+      ansible.builtin.assert:
+        that:
+          - result is changed
+          - result.commands == ['vlan 43 name "Content ' ~ inventory_hostname ~ '"']
+        fail_msg: '{{ result | to_json }}'
+    - name: 'Send a Jinja2 template rendered with the template lookup (run again: nothing changes)'
+      ale.aos8.aos8_config:
+        content: '{{ lookup(''ansible.builtin.template'', ''aos8_config_content.j2'') }}'
+      register: result
+    - name: Check that the second run changed nothing
+      ansible.builtin.assert:
+        that:
+          - result is not changed
+          - '''commands'' not in result'
     - name: Save the configuration when the task changes it
       ale.aos8.aos8_config:
         lines:
